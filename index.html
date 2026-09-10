@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Choice Before the Card</title>
+<!--
+SPEC ─────────────────────────────────────────────
+PURPOSE   Proves Tony's Sep 10 idea: a chooser page before the card step
+          (pay now and get reimbursed / free order with the Content Guarantee),
+          with the card entry moved into a bottom sheet that opens from the
+          chosen option. Fixture = the 28 Litsea collab, Delivery step, from
+          the production screenshot Julia sent Sep 9 2026.
+SCOPE     Working here: chooser -> tap option -> bottom sheet (guarantee card
+          save / pay-now charge) -> done state -> Continue. Learn more opens the
+          rev-5 Content Guarantee explainer as a stacked sheet. Card fields
+          validate; CTA enables when complete; loading state on save.
+          Alternates B (recommended first), C (segmented, same page) and
+          D (footnote exit) render from the same template.
+OUT       Rendered but inert: back chevron, View Brief, Change, Receipt,
+          Content Guarantee Terms link (toast). Not built: address, Content
+          and Publish steps, 3DS, declines, settings.
+DATA      const DB below is schema-shaped; field names are the proposed
+          contract (order_cover, payment_intent_id, refund_status). Prices are
+          real 28 Litsea retail prices (28litsea.com, Sep 10 2026).
+DECISIONS Deliberate choices, do not "fix":
+          - Option cards are buttons; tapping opens the sheet. No radio +
+            Continue (Tony: "they tap number two and then they put in the
+            credit card").
+          - Tony's order kept: pay-now first, Recommended second. B swaps it.
+          - No Apple Pay: the Sep 9 production screenshot has none.
+          - No refund timeline anywhere (Julia, Aug 20 rule).
+          - No em dashes in any copy (house rule).
+          - Consent line stays adjacent to the save button (Tony, Aug 20:
+            no checkbox).
+OPEN      See section 06 on the page. Headline items: who keeps the pay-now
+          money; option order; question wording; re-bless the top-block
+          sentence (Sep 9 decision assumed the card sat below it).
+QA        Passes run: console/token/resize(393,320 phone; 1440,1280,768 page)/
+          states/keyboard/long-content/contrast/proof, Sep 10 2026.
+──────────────────────────────────────────────────
+-->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237a5cfa'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Inter,sans-serif' font-size='18' font-weight='700' fill='white'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* study page (same ramp as creator-ghosting-study/screen.html) */
+  --ink:#1c1c1c; --ink-2:#393939; --ink-3:#555555; --ink-4:#717171; --ink-5:#8e8e8e;
+  --line:#e3e3e3; --line-soft:#eef0f1; --pane:#f9fafb; --tint:#f8f9fa; --white:#ffffff;
+  --purple:#7a5cfa; --purple-deep:#5b3fd6; --purple-wash:#f4f1ff; --purple-line:#e2d9ff;
+  --amber-ink:#a85321; --amber-wash:#fdf6ec; --amber-line:#ecd9b4;
+  --green:#17864f; --green-wash:#eef7f1;
+  --red:#b3402a; --red-wash:#fbf1ee;
+  --mark:#fff3c4;
+  --r:12px; --r-sm:8px; --r-lg:16px;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --fs-11:11px; --fs-12:12px; --fs-13:13px; --fs-14:14px; --fs-15:15px; --fs-17:17px; --fs-21:21px; --fs-29:29px;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:64px;
+  --z-sticky:100; --z-overlay:300; --z-modal:310; --z-toast:400;
+  --t-fast:120ms; --t-med:220ms; --t-sheet:260ms;
+  --shadow-1:0 1px 2px rgba(16,24,40,.05);
+  --shadow-phone:0 30px 70px rgba(0,0,0,.20),0 8px 22px rgba(0,0,0,.10);
+  --shadow-sheet:0 -12px 40px rgba(0,0,0,.14);
+  --shadow-cta:0 6px 16px rgba(122,92,250,.24);
+  --shadow-seg:0 1px 3px rgba(16,24,40,.12);
+  --bezel:#17181b;
+
+  /* phone: production replica of the 28 Litsea Delivery step (Sep 9 2026 screenshot, 393x852) */
+  --p-bg:#f5f6f8; --p-surface:#ffffff; --p-ink:#1f1f22; --p-ink-2:#5f6570; --p-ink-3:#8a9099; --p-ph:#9a9fa8;
+  --p-line:#e4e6ea; --p-line-soft:#eceef1; --p-fill:#eceef1; --p-grab:#d6d8dd;
+  --p-accent:#7a5cfa; --p-accent-deep:#5b3fd6; --p-accent-dis:#e9e4fb; --p-accent-dis-ink:#c4b8f7; --p-accent-wash:#f4f1ff;
+  --p-scrim:rgba(23,24,27,.38);
+  --p-green:#15803d; --p-red:#b91c1c;
+  --pf-12:12px; --pf-13:13px; --pf-14:14px; --pf-15:15px; --pf-17:17px; --pf-20:20px; --pf-22:22px; --pf-24:24px;
+  --p-w:393px; --p-h:852px; --p-gutter:17px; --p-field:56px; --p-cta:52px; --p-radius:14px; --p-sheet-radius:22px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px;-webkit-text-size-adjust:100%}
+body{font-family:var(--font);background:var(--pane);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:var(--fs-14);line-height:1.5;overflow-x:hidden}
+button{font-family:inherit;cursor:pointer;color:inherit}
+input{font-family:inherit;color:inherit}
+a{color:var(--purple-deep)}
+:focus-visible{outline:2px solid var(--purple);outline-offset:2px;border-radius:4px}
+:focus:not(:focus-visible){outline:none}
+::selection{background:var(--purple-wash)}
+img,svg{display:block;max-width:100%}
+
+/* ───────── study page chrome ───────── */
+.topnav{position:sticky;top:0;z-index:var(--z-sticky);background:var(--pane);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:12px 24px;overflow-x:auto;white-space:nowrap}
+.topnav .b{font-weight:700;font-size:var(--fs-13);display:flex;align-items:center;gap:8px;margin-right:14px}
+.topnav .b i{width:20px;height:20px;border-radius:6px;background:var(--purple);color:var(--white);display:grid;place-items:center;font-style:normal;font-size:var(--fs-12);font-weight:700}
+.topnav a{font-size:var(--fs-12);font-weight:500;color:var(--ink-3);text-decoration:none;padding:6px 11px;border-radius:999px;border:1px solid transparent;transition:background-color var(--t-fast),border-color var(--t-fast)}
+.topnav a:hover{background:var(--white);border-color:var(--line)}
+.wrap{max-width:1280px;margin:0 auto;padding:0 24px 140px}
+.hero{padding:44px 0 6px;max-width:880px}
+.kicker{font-size:var(--fs-11);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--purple-deep)}
+.hero h1{font-size:var(--fs-29);line-height:1.25;font-weight:700;letter-spacing:-.02em;margin-top:10px;text-wrap:balance}
+.hero .lede{margin-top:12px;font-size:var(--fs-15);line-height:1.55;color:var(--ink-3);max-width:70ch}
+.hero .lede b{color:var(--ink);font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-12);line-height:1.3;font-weight:500;color:var(--ink-4);background:var(--white);border:1px solid var(--line);border-radius:999px;padding:5px 11px;text-decoration:none}
+.chip.on{border-color:var(--purple-line);background:var(--purple-wash);color:var(--purple-deep)}
+.hero .meta{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+mark{background:var(--mark);border-radius:3px;padding:0 2px;color:inherit}
+
+section{margin-top:56px}
+.shead{display:flex;align-items:baseline;gap:14px;padding-bottom:12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.shead .no{font-size:var(--fs-12);font-weight:700;color:var(--ink-5);letter-spacing:.06em}
+.shead h2{font-size:var(--fs-21);line-height:1.3;font-weight:600;letter-spacing:-.01em}
+.shead .q{margin-left:auto;font-size:var(--fs-12);color:var(--ink-4);font-style:italic}
+.intro{margin-top:14px;font-size:var(--fs-14);line-height:1.55;color:var(--ink-3);max-width:76ch}
+.intro b{color:var(--ink);font-weight:600}
+.intro a{font-weight:500}
+
+.quote{margin-top:22px;background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:20px 24px;max-width:760px;box-shadow:var(--shadow-1)}
+.quote .who{display:flex;align-items:center;gap:10px;font-size:var(--fs-12);color:var(--ink-4);margin-bottom:12px}
+.quote .who b{color:var(--ink);font-weight:600}
+.quote .av{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--white);display:grid;place-items:center;font-size:var(--fs-11);font-weight:700}
+.quote p{font-size:var(--fs-14);line-height:1.6;color:var(--ink-2);white-space:pre-line}
+.quote p+p{margin-top:12px}
+.quote .tag{display:inline-block;font-size:var(--fs-11);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber-ink);background:var(--amber-wash);border:1px solid var(--amber-line);border-radius:999px;padding:3px 9px;margin-left:auto}
+
+/* provenance labels */
+.prov{display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-11);font-weight:600;letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:3px 9px;border:1px solid var(--line);color:var(--ink-4);background:var(--white);white-space:nowrap}
+.prov.decided{color:var(--green);border-color:var(--green);background:var(--green-wash)}
+.prov.proposed{color:var(--amber-ink);border-color:var(--amber-line);background:var(--amber-wash)}
+.prov.open{color:var(--red);border-color:var(--red);background:var(--red-wash)}
+.prov.mine{color:var(--purple-deep);border-color:var(--purple-line);background:var(--purple-wash)}
+
+/* range board */
+.range{margin-top:22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(228px,100%),1fr));gap:14px}
+.rc{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:14px 14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.rc.built{border-color:var(--purple-line);box-shadow:0 0 0 1px var(--purple-line)}
+.rc .rl{display:flex;align-items:center;gap:8px}
+.rc .rl .lt{min-width:24px;height:24px;padding:0 7px;border-radius:7px;background:var(--ink);color:var(--white);display:grid;place-items:center;font-size:var(--fs-11);font-weight:700;letter-spacing:.03em}
+.rc.built .rl .lt{background:var(--purple)}
+.rc .rl h3{font-size:var(--fs-14);font-weight:600;letter-spacing:-.01em;line-height:1.25}
+.rc .rl .bt{margin-left:auto;font-size:var(--fs-11);font-weight:600;color:var(--purple-deep);white-space:nowrap}
+.rc .q{font-size:var(--fs-12);line-height:1.45;color:var(--ink-3);font-style:italic}
+.rc .v{font-size:var(--fs-12);line-height:1.5;color:var(--ink-2)}
+.rc .v b{font-weight:600;color:var(--ink)}
+/* sketch primitives (sketch-level by agreement; INTENT: raw wireframe grammar) */
+.sk{position:relative;width:104px;height:176px;background:var(--white);border:1px solid var(--line);border-radius:10px;padding:10px 9px 9px;display:flex;flex-direction:column;gap:5px;overflow:hidden;align-self:center;background:var(--tint)}
+.sk i{display:block;border-radius:2px;background:var(--line);height:3px;width:70%}
+.sk i.h{height:6px;width:64%;background:var(--ink-5);border-radius:2px;margin-bottom:2px}
+.sk i.s{width:44%}
+.sk i.m{width:82%}
+.sk .bx{border:1px solid var(--line);border-radius:5px;background:var(--white);padding:5px 5px 6px;display:flex;flex-direction:column;gap:3px}
+.sk .bx i{width:60%}
+.sk .bx i+i{width:88%}
+.sk .bx.rec{border-color:var(--purple)}
+.sk .bx.rec::before{content:"";display:block;width:28%;height:3px;background:var(--purple);border-radius:2px;margin-bottom:1px}
+.sk .fld{height:12px;border:1px solid var(--line);border-radius:4px;background:var(--white)}
+.sk .btn{height:9px;border-radius:3px;background:var(--purple);margin-top:auto}
+.sk .btn.dis{background:var(--p-accent-dis)}
+.sk .lnk{height:3px;width:56%;background:var(--purple);border-radius:2px;align-self:center}
+.sk .seg{height:11px;border-radius:4px;background:var(--line-soft);display:flex;padding:2px}
+.sk .seg b{flex:1;background:var(--white);border-radius:3px;box-shadow:var(--shadow-seg)}
+.sk .seg u{flex:1}
+.sk .row{display:flex;justify-content:space-between;align-items:center}
+.sk .row i{width:44%}
+.sk .row i+i{width:18%}
+.sk .row i.tot{background:var(--ink-5)}
+.sk .dim{position:absolute;inset:0;background:var(--p-scrim);opacity:.55}
+.sk .sh{position:absolute;left:0;right:0;bottom:0;height:52%;background:var(--white);border-top:1px solid var(--line);border-radius:8px 8px 0 0;padding:8px 8px 7px;display:flex;flex-direction:column;gap:4px}
+.sk .sh::before{content:"";width:16px;height:2px;border-radius:2px;background:var(--p-grab);align-self:center;margin-bottom:2px}
+.sk .tl{display:flex;align-items:center;gap:3px;margin:2px 0}
+.sk .tl b{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--ink-5);background:var(--white);flex-shrink:0}
+.sk .tl b.on{background:var(--purple);border-color:var(--purple)}
+.sk .tl u{flex:1;height:1px;background:var(--line)}
+.sk .chk{width:14px;height:14px;border-radius:50%;background:var(--green);align-self:center;margin:10px 0 2px}
+
+/* phone galleries */
+.phones{margin-top:24px;display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.pcell{display:flex;flex-direction:column;gap:10px;min-width:0}
+.pcell .ph-cap{font-size:var(--fs-13);color:var(--ink-3);line-height:1.45;max-width:38ch}
+.pcell .ph-cap b{color:var(--ink);font-weight:600;display:block;font-size:var(--fs-14)}
+.ph-scale{width:calc(var(--p-w) * .72);height:calc(var(--p-h) * .72);flex:none}
+.ph-scale .ph{transform:scale(.72);transform-origin:top left}
+.live-row{margin-top:24px;display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start}
+.live-notes{flex:1 1 320px;min-width:0;max-width:520px;display:flex;flex-direction:column;gap:10px}
+.live-notes h3{font-size:var(--fs-15);font-weight:600;letter-spacing:-.01em}
+.note{display:flex;gap:10px;font-size:var(--fs-13);line-height:1.5;color:var(--ink-2)}
+.note .nd{width:18px;height:18px;border-radius:50%;background:var(--ink);color:var(--white);display:grid;place-items:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
+.note b{font-weight:600;color:var(--ink)}
+.notes{margin-top:18px;display:flex;flex-direction:column;gap:8px;max-width:880px}
+
+/* tables */
+.tbl{margin-top:20px;overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--white)}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th{font-size:var(--fs-11);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-4);text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--tint)}
+td{font-size:var(--fs-13);line-height:1.5;color:var(--ink-2);padding:12px 16px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td b{font-weight:600;color:var(--ink)}
+td.el{font-weight:600;color:var(--ink);white-space:nowrap}
+td .was{color:var(--ink-4)}
+td .now{color:var(--ink)}
+td .prov{margin-top:6px}
+
+.cols{margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:14px}
+.card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;min-width:0}
+.card h3{font-size:var(--fs-14);font-weight:600;margin-bottom:8px;letter-spacing:-.01em}
+.card p,.card li{font-size:var(--fs-13);line-height:1.55;color:var(--ink-2)}
+.card p+p{margin-top:8px}
+.card ul{padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.card b{font-weight:600;color:var(--ink)}
+.card.warn{border-color:var(--amber-line);background:var(--amber-wash)}
+.card.good{border-color:var(--green);background:var(--green-wash)}
+.dlist{margin-top:20px;display:flex;flex-direction:column;gap:10px;max-width:960px}
+.drow{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;align-items:start;background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px}
+.drow .dt{font-size:var(--fs-13);line-height:1.5;color:var(--ink-2)}
+.drow .dt b{font-weight:600;color:var(--ink)}
+.drow .dt .who{display:block;font-size:var(--fs-12);color:var(--ink-4);margin-top:3px}
+.inv{margin-top:18px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--fs-12);line-height:1.7;color:var(--ink-2);background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;overflow-x:auto;white-space:pre}
+footer{margin-top:64px;font-size:var(--fs-12);color:var(--ink-5);line-height:1.6;border-top:1px solid var(--line);padding-top:16px}
+
+/* state rail: OUT-OF-SCOPE demo tooling (static, lives under the live phone's notes so it never covers content) */
+.rail{display:flex;flex-wrap:wrap;gap:6px;background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:10px;margin-top:8px}
+.rail .rt{width:100%;font-size:var(--fs-11);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-4)}
+.rail button{font-size:var(--fs-12);font-weight:500;color:var(--ink-3);background:var(--white);border:1px solid var(--line);border-radius:999px;padding:5px 10px;transition:background-color var(--t-fast),border-color var(--t-fast),color var(--t-fast)}
+.rail button:hover{background:var(--tint);border-color:var(--ink-5)}
+.rail button.on{background:var(--ink);color:var(--white);border-color:var(--ink)}
+
+/* ───────── the phone (393 x 852 production replica) ───────── */
+.ph{width:var(--p-w);height:var(--p-h);background:var(--p-surface);border-radius:46px;border:11px solid var(--bezel);box-shadow:var(--shadow-phone);overflow:hidden;position:relative;color:var(--p-ink);font-size:var(--pf-17);line-height:1.4;display:flex;flex-direction:column;flex:none}
+.ph-status{height:54px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 30px 10px 34px;font-size:var(--pf-17);font-weight:600;flex:none}
+.ph-status .ic{display:flex;gap:5px;align-items:center}
+.ph-status .ic i{display:block;background:var(--p-ink);border-radius:1.5px}
+.ph-head{display:flex;align-items:center;gap:12px;padding:6px 14px 0 20px;flex:none;min-height:60px} /* INTENT: production measures 20/14 side padding, chevron hugs the avatar, title column ~200pt */
+.ph-head .bk{width:24px;height:44px;margin-right:-6px;display:grid;place-items:center;color:var(--p-ink);background:none;border:none;flex:none;padding:0}
+.ph-head .av{width:41px;height:41px;border-radius:50%;border:1px solid var(--p-line);display:grid;place-items:center;font-size:var(--pf-22);font-weight:500;color:var(--p-ink);flex:none;background:var(--p-surface)}
+.ph-head .tt{min-width:0;flex:1}
+.ph-head .bn{font-size:var(--pf-20);font-weight:600;letter-spacing:-.01em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph-head .cn{font-size:var(--pf-15);color:var(--p-ink-2);line-height:1.3;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph-head .vb{font-size:var(--pf-17);font-weight:600;color:var(--p-ink);background:none;border:none;padding:0;flex:none;min-height:44px}
+.ph-stepper{display:flex;gap:6px;padding:20px 20px 16px;border-bottom:1px solid var(--p-line-soft);flex:none}
+.ph-stepper .st{flex:1;min-width:0}
+.ph-stepper .st i{display:block;height:4px;border-radius:999px;background:var(--p-line);margin-bottom:12px;position:relative;overflow:hidden}
+.ph-stepper .st.done i{background:var(--p-ink)}
+.ph-stepper .st.cur i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:26%;background:var(--p-ink);border-radius:999px}
+.ph-stepper .st span{font-size:var(--pf-17);color:var(--p-ink-2);font-weight:400;display:block;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph-stepper .st.done span,.ph-stepper .st.cur span{color:var(--p-ink);font-weight:600}
+.ph-body{background:var(--p-bg);flex:1;min-height:0;padding:24px var(--p-gutter) 0;display:flex;flex-direction:column;gap:24px;overflow-y:auto;overflow-x:hidden;position:relative}
+.ph-body.tight{gap:20px} /* INTENT: variants C and D carry the inline form; 20px keeps production's rhythm inside 852 */
+.ph-body>*{flex:none}
+.ph-title{font-size:var(--pf-24);font-weight:700;letter-spacing:-.02em;line-height:1.2;text-wrap:balance}
+.ph-lede{font-size:var(--pf-17);line-height:1.45;color:var(--p-ink-2);margin-top:8px}
+.ph-lede b{color:var(--p-ink);font-weight:600}
+.ph-q{font-size:var(--pf-20);font-weight:600;letter-spacing:-.01em;line-height:1.25}
+.ph-opts{display:flex;flex-direction:column;gap:12px;margin-top:-10px}
+.opt{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;background:var(--p-surface);border:1px solid var(--p-line);border-radius:var(--p-radius);padding:16px 16px 17px 18px;min-height:44px;transition:background-color var(--t-fast),border-color var(--t-fast);box-shadow:var(--shadow-1)}
+.opt:hover{background:var(--p-accent-wash)}
+.opt:active{background:var(--p-line-soft)}
+.opt.is-rec{border-color:var(--p-accent);box-shadow:0 0 0 1px var(--p-accent)}
+.opt .ot{flex:1;min-width:0;display:block}
+.opt .tag{display:block;font-size:var(--pf-12);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--p-accent-deep);margin-bottom:6px}
+.opt .ttl{display:block;font-size:var(--pf-17);font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.opt .bd{display:block;font-size:var(--pf-15);line-height:1.4;color:var(--p-ink-2);margin-top:4px}
+.opt .bd b{color:var(--p-ink);font-weight:600}
+.opt .chev{flex:none;color:var(--p-ink-3);margin-top:3px}
+.ph-foot{margin-top:auto;padding-bottom:28px;display:flex;flex-direction:column;gap:12px}
+.ph-cta{height:var(--p-cta);border-radius:var(--p-radius);background:var(--p-accent);color:var(--p-surface);border:none;width:100%;font-size:var(--pf-17);font-weight:600;letter-spacing:-.01em;position:relative;box-shadow:var(--shadow-cta);transition:background-color var(--t-fast);white-space:nowrap}
+.ph-cta:hover{background:var(--p-accent-deep)}
+.ph-cta[disabled]{background:var(--p-accent-dis);color:var(--p-accent-dis-ink);box-shadow:none;cursor:not-allowed}
+.ph-cta.is-loading .lbl{visibility:hidden}
+.ph-cta .spin{display:none;position:absolute;inset:0;margin:auto;width:22px;height:22px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:var(--p-surface)}
+.ph-cta.is-loading .spin{display:block;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ph-lock{display:flex;align-items:flex-start;justify-content:center;gap:8px;font-size:var(--pf-14);line-height:1.35;color:var(--p-ink-2);text-align:center;padding:0 12px}
+.ph-lock svg{flex:none;margin-top:2px}
+.ph-consent{font-size:var(--pf-15);line-height:1.4;color:var(--p-ink-2);text-align:center;padding:0 8px}
+.ph-consent a,.ph-lede a,.sh-sub a,.ph-hint a,.ph-note a{color:var(--p-accent);font-weight:600;text-decoration:none}
+.ph-home{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:134px;height:5px;border-radius:999px;background:var(--p-ink);z-index:var(--z-modal)}
+
+/* fields (shared by sheet and inline variants) */
+.flds{display:flex;flex-direction:column;gap:12px}
+.fld{height:var(--p-field);background:var(--p-surface);border:1px solid var(--p-line);border-radius:var(--p-radius);display:flex;align-items:center;gap:12px;padding:0 18px;font-size:var(--pf-17);color:var(--p-ink);transition:border-color var(--t-fast),box-shadow var(--t-fast)}
+.fld:focus-within{border-color:var(--p-accent);box-shadow:0 0 0 3px var(--p-accent-dis)}
+.fld input{border:none;background:none;outline:none;font-size:var(--pf-17);color:var(--p-ink);min-width:0;width:100%;height:100%;padding:0;text-overflow:ellipsis} /* INTENT: outline:none here because the parent .fld draws the focus ring via :focus-within */
+.fld input::placeholder{color:var(--p-ph)}
+.fld.card{gap:10px}
+.fld.card input.num{flex:1}
+.fld.card input.exp{width:52px;flex:none;text-align:left}
+.fld.card input.cvc{width:46px;flex:none}
+.fld .cc{width:28px;height:19px;border-radius:3px;background:var(--p-ph);position:relative;flex:none;opacity:.75}
+.fld .cc::after{content:"";position:absolute;left:4px;right:4px;bottom:4px;height:3px;border-radius:1px;background:var(--p-surface)}
+.fld.static{background:var(--p-fill);border-color:var(--p-fill);color:var(--p-ink-2)}
+.fld-row{display:flex;gap:14px}
+.fld-row .fld:first-child{flex:1.3}
+.fld-row .fld:last-child{flex:1}
+
+/* bottom sheets */
+.sh-dim{position:absolute;inset:0;background:var(--p-scrim);z-index:var(--z-overlay);border:none;padding:0;cursor:default}
+.sh{position:absolute;left:0;right:0;bottom:0;z-index:var(--z-modal);background:var(--p-surface);border-radius:var(--p-sheet-radius) var(--p-sheet-radius) 0 0;padding:12px var(--p-gutter) 30px;box-shadow:var(--shadow-sheet);display:flex;flex-direction:column;gap:20px;max-height:calc(100% - 56px);overflow:hidden}
+.sh.tall{top:44px;max-height:none;gap:16px}
+.sh .grab{width:36px;height:5px;border-radius:999px;background:var(--p-grab);margin:0 auto;flex:none}
+.sh-head{display:flex;flex-direction:column;gap:6px;margin-top:-6px}
+.sh-title{font-size:var(--pf-22);font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.sh-title .amt{font-variant-numeric:tabular-nums}
+.sh-sub{font-size:var(--pf-15);line-height:1.45;color:var(--p-ink-2)}
+.sh-sub b{color:var(--p-ink);font-weight:600}
+.sh .flds{margin-top:-4px}
+.sh-foot{display:flex;flex-direction:column;gap:12px;margin-top:-4px}
+.sh-body{overflow-y:auto;min-height:0;flex:1;display:flex;flex-direction:column;gap:12px;margin-top:-4px}
+.gcard{background:var(--p-bg);border-radius:var(--p-radius);padding:14px 16px}
+.gcard .gico{width:36px;height:36px;border-radius:11px;background:var(--p-accent-wash);color:var(--p-accent-deep);display:grid;place-items:center;margin-bottom:10px}
+.gcard h5{font-size:var(--pf-17);font-weight:600;letter-spacing:-.01em;margin-bottom:6px}
+.gcard p,.oq p{font-size:var(--pf-15);line-height:1.4;color:var(--p-ink-2)}
+.gcard p b,.oq p b{color:var(--p-ink);font-weight:600}
+.oq{padding:4px 2px 0}
+.oq h5{font-size:var(--pf-17);font-weight:600;margin-bottom:6px}
+@media (prefers-reduced-motion:no-preference){
+  .sh{animation:sh-in var(--t-sheet) ease-out}
+  .sh-dim{animation:dim-in 200ms ease-out}
+  @keyframes sh-in{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+  @keyframes dim-in{from{opacity:0}to{opacity:1}}
+}
+
+/* done state */
+.sum{display:flex;align-items:center;gap:14px;background:var(--p-surface);border:1px solid var(--p-line);border-radius:var(--p-radius);padding:16px 18px;box-shadow:var(--shadow-1);margin-top:-8px}
+.sum .sic{width:40px;height:40px;border-radius:12px;background:var(--p-accent-wash);color:var(--p-accent-deep);display:grid;place-items:center;flex:none}
+.sum .st{flex:1;min-width:0}
+.sum .st b{display:block;font-size:var(--pf-17);font-weight:600;line-height:1.3}
+.sum .st span{display:block;font-size:var(--pf-15);color:var(--p-ink-2);line-height:1.35;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sum .act{font-size:var(--pf-15);font-weight:600;color:var(--p-accent);background:none;border:none;padding:0;flex:none;min-height:44px}
+.ph-note{font-size:var(--pf-15);line-height:1.45;color:var(--p-ink-2);text-align:center;padding:0 8px}
+.ph-hint{font-size:var(--pf-15);line-height:1.45;color:var(--p-ink-2);text-align:center;padding:0 8px}
+
+/* segmented control (variant C) */
+.seg{display:flex;background:var(--p-line-soft);border-radius:12px;padding:3px;gap:2px;margin-top:-10px}
+.seg button{flex:1;min-height:44px;border:none;border-radius:10px;background:none;font-size:var(--pf-15);font-weight:500;color:var(--p-ink-2);padding:0 8px;line-height:1.2;transition:background-color var(--t-fast),color var(--t-fast)}
+.seg button[aria-pressed="true"]{background:var(--p-surface);color:var(--p-ink);font-weight:600;box-shadow:var(--shadow-seg)}
+.seg-note{font-size:var(--pf-15);line-height:1.45;color:var(--p-ink-2);margin-top:-12px}
+.seg-note b{color:var(--p-ink);font-weight:600}
+.ph-sec{font-size:var(--pf-24);font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.ph-para{font-size:var(--pf-17);line-height:1.45;color:var(--p-ink-2);margin-top:-14px}
+.ph-para a{color:var(--p-accent);font-weight:600;text-decoration:none;display:inline-block;margin-top:6px}
+
+/* narrow screens: the review page is desktop-first, but a shared link opens on phones */
+@media (max-width:480px){
+  .wrap{padding:0 16px 100px}
+  .live-row{gap:20px}
+  .live-row .ph{transform:scale(.86);transform-origin:top left;margin-bottom:calc(var(--p-h) * -0.14)}
+  .drow{grid-template-columns:1fr}
+}
+
+/* toast inside the phone */
+.ph-toast{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);background:var(--p-ink);color:var(--p-surface);font-size:var(--pf-14);font-weight:500;padding:10px 16px;border-radius:999px;z-index:var(--z-modal);white-space:nowrap;opacity:0;transition:opacity var(--t-med);pointer-events:none}
+.ph-toast.on{opacity:1}
+
+/* placeholder step */
+.ph-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;flex:1;text-align:center;color:var(--p-ink-2);padding:0 24px 80px}
+.ph-empty b{font-size:var(--pf-20);font-weight:600;color:var(--p-ink)}
+.ph-empty span{font-size:var(--pf-15);line-height:1.45}
+.ph-empty .ph-cta{margin-top:16px;width:auto;padding:0 24px}
+</style>
+</head>
+<body>
+
+<nav class="topnav" aria-label="Sections">
+  <span class="b"><i>B</i>The Choice Before the Card</span>
+  <a href="#idea">The idea</a>
+  <a href="#range">Range</a>
+  <a href="#flow">The flow</a>
+  <a href="#states">States</a>
+  <a href="#alts">Alternates</a>
+  <a href="#copy">Copy</a>
+  <a href="#mech">Pay-now mechanics</a>
+  <a href="#decisions">Decisions</a>
+  <a href="#handoff">Handoff</a>
+</nav>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">Content Guarantee · the step before the card</div>
+  <h1>The Choice Before the Card</h1>
+  <p class="lede">Tony's Sep 10 idea, built: instead of landing on a card field, the creator lands on a question, <b>how do you want to place the order</b>, with two answers. Pay now and get reimbursed, or a free order backed by the Content Guarantee, marked Recommended. Tapping the free option opens the card as a bottom sheet, so the card arrives with its reason attached. This page holds the range we looked at first, the flow in the real 28 Litsea Delivery-step chrome, three alternates, the copy deck, and what pay-now would take to run.</p>
+  <div class="meta">
+    <span class="chip on">Proposed by Tony · Sep 10 2026, 5:10am CEST · group DM with Katie and Julia</span>
+    <span class="chip">Fixture: 28 Litsea, Delivery step, Sep 9 production screenshot</span>
+    <span class="chip">393 × 852 · clickable</span>
+    <span class="chip">Real prices from 28litsea.com</span>
+  </div>
+</header>
+
+<!-- ───────────────────────── 00 THE IDEA ───────────────────────── -->
+<section id="idea">
+  <div class="shead"><span class="no">00</span><h2>The idea, in Tony's words</h2><span class="q">Sep 10 2026 · not yet decided</span></div>
+  <p class="intro">The trigger is a hypothesis, not a stall count yet: <b>if more creators have a problem with the Content Guarantee the way it's framed today</b>, this is one way to solve it. The card A/B (Aug 18) is still the running test. This design is built so it is ready the moment the numbers call for it.</p>
+  <div class="quote">
+    <div class="who"><span class="av">T</span><b>Tony Staehelin</b> · Sep 10 2026, 5:10am CEST · group DM (Tony, Katie, Julia) <span class="tag">Proposed</span></div>
+    <p>It'll be interesting to see if more people have a problem with the content guarantee the way it's framed currently. If so, there's lots of ways we can solve it, but one idea is letting them choose:
+
+How do you want to place the order
+
+1) Pay now, get reimbursed
+You pay for the order now, once you post you get reimburse the full order cost.
+
+Recommended
+2) Free order, content guarantee
+The brand covers your order, you don't pay anything. You add a credit card to Benable as a guarantee, and we only charge the order if you never post the content.</p>
+    <p>I feel like that's less scary than seeing a credit card field. So they tap number two and then they put in the credit card and they know what it's for.</p>
+  </div>
+  <div class="notes">
+    <div class="note"><span class="nd">1</span><span><b>What the idea is really doing.</b> Two things at once. It gives the creator a choice where there was a demand, which takes the sting out of "why do you want my card". And it puts a priced alternative next to the card, so $0 today reads as the generous option instead of a catch. Pay-now is a real path, not a prop: creators who will not keep a card on file exist, and for them it is the honest answer. It just has to stay genuinely usable or the page becomes a dark pattern.</span></div>
+    <div class="note"><span class="nd">2</span><span><b>The risk it introduces.</b> The first thing the creator reads is a price. Until now money was invisible on this step. Tony's order (pay-now first) creates the relief read: "$52 now? Oh, or free." Alternate B keeps the good news first for the creator who never thought about money at all. That order is Tony's call, not settled here.</span></div>
+    <div class="note"><span class="nd">3</span><span><b>What stays true from earlier decisions.</b> The consent line sits next to the save button, no checkbox (Tony, Aug 20). The guarantee amount is the product price (Julia, Aug 20). No refund timeline is ever promised (Julia, Aug 20). The contact on the explainer stays kscalzo@benable.com (Katie). The production screenshot from Sep 9 has no Apple Pay, so none is added here.</span></div>
+  </div>
+</section>
+
+<!-- ───────────────────────── 01 RANGE ───────────────────────── -->
+<section id="range">
+  <div class="shead"><span class="no">01</span><h2>Range first: ten ways to put something before the card</h2><span class="q">sketch level by agreement · A to D built below</span></div>
+  <p class="intro">Tony's chooser is one answer to "what goes in front of the card". Before going deep on it, here are ten structurally different answers, each tagged with the question it answers. Four are built at full fidelity in the sections below; the rest stay as sketches so they can be pulled forward if the test says so.</p>
+  <div class="range">
+
+    <div class="rc built">
+      <div class="rl"><span class="lt">A</span><h3>Tony's chooser</h3><span class="bt">Built · the flow</span></div>
+      <div class="sk"><i class="h"></i><i class="m"></i><i class="s"></i><div class="bx"><i></i><i></i></div><div class="bx rec"><i></i><i></i><i></i></div></div>
+      <p class="q">What if the card arrives with its alternative attached?</p>
+      <p class="v">Two option cards, pay-now first, <b>Recommended</b> on the free one. Tap opens the card as a sheet. The relief read is the whole point.</p>
+    </div>
+
+    <div class="rc built">
+      <div class="rl"><span class="lt">B</span><h3>Recommended first</h3><span class="bt">Built · alternate</span></div>
+      <div class="sk"><i class="h"></i><i class="m"></i><i class="s"></i><div class="bx rec"><i></i><i></i><i></i></div><div class="bx"><i></i><i></i></div></div>
+      <p class="q">What if relief comes before the anchor?</p>
+      <p class="v">Same cards, good news first. Safer for the creator who never thought about money; weaker anchor. <b>Tony's call.</b></p>
+    </div>
+
+    <div class="rc built">
+      <div class="rl"><span class="lt">C</span><h3>Segmented, same page</h3><span class="bt">Built · alternate</span></div>
+      <div class="sk"><i class="h"></i><i class="m"></i><div class="seg"><b></b><u></u></div><i class="m"></i><div class="fld"></div><div class="fld"></div><div class="btn dis"></div></div>
+      <p class="q">What if we do not add a page?</p>
+      <p class="v">A two-segment control above today's fields; the CTA morphs. Zero extra taps, but the card field is on screen from the start, which is what Tony wants to avoid.</p>
+    </div>
+
+    <div class="rc built">
+      <div class="rl"><span class="lt">D</span><h3>Footnote exit</h3><span class="bt">Built · alternate</span></div>
+      <div class="sk"><i class="h"></i><i class="m"></i><i class="s"></i><div class="fld"></div><div class="fld"></div><div class="btn dis"></div><i class="lnk"></i></div>
+      <p class="q">What if the choice is an exit, not a menu?</p>
+      <p class="v">Today's page plus one quiet line under the button: pay now instead. Smallest change; only helps the creator who already objects.</p>
+    </div>
+
+    <div class="rc">
+      <div class="rl"><span class="lt">E</span><h3>The receipt</h3></div>
+      <div class="sk"><i class="h"></i><div class="row"><i></i><i></i></div><div class="row"><i></i><i></i></div><div class="row"><i class="tot"></i><i class="tot"></i></div><i class="m"></i><div class="btn"></div></div>
+      <p class="q">What if we show the money instead of asking a question?</p>
+      <p class="v">Order summary: two items, covered by 28 Litsea, you pay $0, guarantee: a card on file. Strong for "they know what it's for". Adds a page, offers no choice.</p>
+    </div>
+
+    <div class="rc">
+      <div class="rl"><span class="lt">F</span><h3>What happens next</h3></div>
+      <div class="sk"><i class="h"></i><i class="s"></i><div class="tl"><b class="on"></b><u></u><b></b><u></u><b></b></div><i class="m"></i><div class="tl"><b class="on"></b><u></u><b></b><u></u><b></b></div><i class="m"></i><div class="btn"></div></div>
+      <p class="q">What if the choice is shown as consequences over time?</p>
+      <p class="v">Two rows: today, you post, after. Guarantee: $0, post, nothing happens. Pay-now: $52, post, $52 back. Explains the mechanics best; too much reading for a Delivery step.</p>
+    </div>
+
+    <div class="rc">
+      <div class="rl"><span class="lt">G</span><h3>Just the sentence</h3></div>
+      <div class="sk"><i class="h"></i><i class="m"></i><i class="m"></i><i class="s"></i><div class="fld"></div><div class="fld"></div><div class="btn dis"></div></div>
+      <p class="q">What if the framing alone fixes it?</p>
+      <p class="v">No new UI. The top block states the trade: 28 Litsea covers your $52 order; a card on file is how we guarantee them a post. Costs nothing, ships with any of the above. The Sep 9 copy already moved this way.</p>
+    </div>
+
+    <div class="rc">
+      <div class="rl"><span class="lt">H</span><h3>Ask nothing</h3></div>
+      <div class="sk"><i class="h"></i><i class="m"></i><div class="chk"></div><i class="s"></i><i class="m"></i><div class="btn"></div></div>
+      <p class="q">What if we ask nothing?</p>
+      <p class="v">Proven creators skip the card: "Your track record covers this one." Already agreed as Katie's carve-out (Aug 18). Policy, not a page, but it is the strongest answer for repeat creators.</p>
+    </div>
+
+    <div class="rc">
+      <div class="rl"><span class="lt">I</span><h3>Three doors</h3></div>
+      <div class="sk"><i class="h"></i><i class="s"></i><div class="bx"><i></i><i></i></div><div class="bx rec"><i></i><i></i></div><div class="bx"><i></i><i></i></div></div>
+      <p class="q">What if we expose the exit?</p>
+      <p class="v">Tony's two plus "I'd rather not add a card", routed to Katie. Honest, but it invites the exit. Aug 18 decided the escape hatch is Katie's email, never on screen.</p>
+    </div>
+
+    <div class="rc">
+      <div class="rl"><span class="lt">J</span><h3>Ask later</h3></div>
+      <div class="sk"><i class="h"></i><i class="m"></i><div class="bx"><i></i><i></i></div><i class="s"></i><i class="m"></i><div class="btn"></div><i class="lnk"></i></div>
+      <p class="q">What if timing is the problem, not framing?</p>
+      <p class="v">Add a card before your order ships, as a dated to-do; the order holds. Depends on whether the card really gates the order, which has been open since Sep 9.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ───────────────────────── 02 THE FLOW ───────────────────────── -->
+<section id="flow">
+  <div class="shead"><span class="no">02</span><h2>The flow, built: Tony's chooser in the 28 Litsea chrome</h2><span class="q">tap either option · sheets are live · fields validate</span></div>
+  <p class="intro">Everything above the gray body is the production Delivery step as photographed on Sep 9: brand header, View Brief, the four-stage stepper. The body changes: the top block keeps the Sep 9 sentence and hands off to the question; two option cards replace the inline card form. Tap the free option and the card sheet slides up under the question, so the reason stays visible above it. Tap pay-now and the same sheet asks for a payment instead.</p>
+  <div class="live-row">
+    <div class="ph" id="live" aria-label="Live prototype: order choice before the card"></div>
+    <div class="live-notes">
+      <h3>What to look at</h3>
+      <div class="note"><span class="nd">1</span><span><b>The question is the section title</b>, in Tony's words. The Sep 9 top block stays the page title, so the screen has one title and one question, not two equal headings (the Sep 9 open item).</span></div>
+      <div class="note"><span class="nd">2</span><span><b>The cards are the actions.</b> No radio, no Continue button. Tony: "they tap number two and then they put in the credit card." The recommended card carries a purple edge and the Recommended tag; nothing else on the page uses color.</span></div>
+      <div class="note"><span class="nd">3</span><span><b>The sheet explains itself in one line</b> and links the full explainer (the rev-5 sheet, verbatim, with $52). $0 today, charged only if nothing is posted, final warning first. The consent line sits above Save and Continue, as decided Aug 20.</span></div>
+      <div class="note"><span class="nd">4</span><span><b>Pay-now is real.</b> Same fields, the button says Pay $52, and the line under the title promises the refund without a date. The done state shows what was chosen, with Change.</span></div>
+      <div class="note"><span class="nd">5</span><span><b>Amount is dynamic.</b> $52 is the creator's actual selection: Top Note Wild Citrus Body Oil at $24 and the flower exfoliant at $28, real 28litsea.com prices. It appears in the pay-now card, both sheets and the explainer, and nowhere else.</span></div>
+      <div class="note"><span class="nd">6</span><span><b>Keyboard works.</b> Tab through the cards, Enter opens the sheet, Esc or the scrim closes it. Use the rail below to jump to any state or fill a demo card.</span></div>
+      <!-- OUT-OF-SCOPE: state-switcher rail, demo tooling -->
+      <div class="rail" id="rail" aria-label="Prototype states">
+        <span class="rt">Live phone · states</span>
+        <button data-state="chooser" class="on">Chooser</button>
+        <button data-state="guarantee">Guarantee sheet</button>
+        <button data-state="filled">Filled</button>
+        <button data-state="explainer">Explainer</button>
+        <button data-state="paynow">Pay sheet</button>
+        <button data-state="done-guarantee">Done · guarantee</button>
+        <button data-state="done-paynow">Done · paid</button>
+        <button data-state="content">Content step</button>
+        <button data-fill="1">Fill demo card</button>
+        <button data-state="reset">Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── 03 STATES ───────────────────────── -->
+<section id="states">
+  <div class="shead"><span class="no">03</span><h2>Every state, side by side</h2><span class="q">rendered from the same template as the live phone</span></div>
+  <p class="intro">The six states a creator can see on this step, static, for review at a glance. Fields in the filled sheet show the moment the button comes alive.</p>
+  <div class="phones" id="gallery"></div>
+</section>
+
+<!-- ───────────────────────── 04 ALTERNATES ───────────────────────── -->
+<section id="alts">
+  <div class="shead"><span class="no">04</span><h2>Alternates at full fidelity</h2><span class="q">B swaps the order · C stays on one page · D is a footnote</span></div>
+  <p class="intro">Three ways to get most of the effect with a different shape. B is the same chooser with the good news first. C never leaves the current page: a segmented control sits above the fields and the button morphs between Save and Continue and Pay $52. D is the current page untouched, with one line under the lock text for the creator who would rather pay. C and D are live: the segments switch and the footnote opens the pay sheet.</p>
+  <div class="phones" id="alts-gallery"></div>
+  <div class="notes">
+    <div class="note"><span class="nd">B</span><span><b>Recommended first</b> reads calmer. The creator who has never thought about money sees $0 before they see $52. The cost is anchoring: with the price second, the free option no longer arrives as relief. If the A/B shows the problem is fear of the card rather than the trade, B is the better shape.</span></div>
+    <div class="note"><span class="nd">C</span><span><b>Segmented</b> is the engineering-cheapest version: the card form and its Stripe element stay where they are, the control only swaps copy and the CTA. But the card field is still the first thing on the screen, so it does not deliver Tony's "less scary than seeing a credit card field".</span></div>
+    <div class="note"><span class="nd">D</span><span><b>Footnote</b> changes nothing for the creator who is fine with the card, and gives the one who objects a way through without Katie. It is the version to ship if pay-now is meant as an escape hatch rather than a framing device.</span></div>
+  </div>
+</section>
+
+<!-- ───────────────────────── 05 COPY ───────────────────────── -->
+<section id="copy">
+  <div class="shead"><span class="no">05</span><h2>Copy deck</h2><span class="q">Tony's words, what is built, and who decided what</span></div>
+  <p class="intro">Every string on the new step. Where Tony wrote the line, his version is shown first; edits are limited to the brand name, the amount and house rules (no em dashes, no refund timeline). The one line that needs a fresh decision is the top-block sentence: the Sep 9 wording assumed the card sat right below it.</p>
+  <div class="tbl"><table>
+    <thead><tr><th style="width:170px">Element</th><th>Source wording</th><th>Built</th><th style="width:190px">Status</th></tr></thead>
+    <tbody>
+      <tr><td class="el">Page title</td><td class="was">"Your product selection is confirmed" (production) · "Your picks are in" (recommended Sep 9)</td><td class="now">Your picks are in</td><td><span class="prov proposed">Recommended Sep 9</span></td></tr>
+      <tr><td class="el">Top-block sentence</td><td class="was">"We've sent your selection to 28 Litsea. Add a card for the Content Guarantee and you're set." (Julia, Sep 9)</td><td class="now">We've sent your selection to 28 Litsea. Choose how to place the order and you're set.</td><td><span class="prov open">Needs Julia's re-bless</span></td></tr>
+      <tr><td class="el">The question</td><td class="was">"How do you want to place the order" (Tony)</td><td class="now">How do you want to place the order?<br><span class="was">Alt: How should we cover your order?</span></td><td><span class="prov proposed">Tony Sep 10</span></td></tr>
+      <tr><td class="el">Option 1 title</td><td class="was">"Pay now, get reimbursed" (Tony)</td><td class="now">Pay now, get reimbursed</td><td><span class="prov proposed">Tony Sep 10</span></td></tr>
+      <tr><td class="el">Option 1 body</td><td class="was">"You pay for the order now, once you post you get reimburse the full order cost." (Tony)</td><td class="now">Pay the $52 order now. Once you post, you get the full order cost back.</td><td><span class="prov mine">Julia's edit · amount added</span></td></tr>
+      <tr><td class="el">Option 2 tag</td><td class="was">"Recommended" (Tony)</td><td class="now">Recommended</td><td><span class="prov proposed">Tony Sep 10</span></td></tr>
+      <tr><td class="el">Option 2 title</td><td class="was">"Free order, content guarantee" (Tony)</td><td class="now">Free order, Content Guarantee</td><td><span class="prov mine">Capitalized as the product term</span></td></tr>
+      <tr><td class="el">Option 2 body</td><td class="was">"The brand covers your order, you don't pay anything. You add a credit card to Benable as a guarantee, and we only charge the order if you never post the content." (Tony)</td><td class="now">28 Litsea covers your order, you don't pay anything. You add a card as a guarantee, and we only charge the order if you never post.</td><td><span class="prov mine">Brand name dynamic · "card" covers debit</span></td></tr>
+      <tr><td class="el">Numbers "1)" "2)"</td><td class="was">Tony numbered the options</td><td class="now">Dropped; the cards are the enumeration</td><td><span class="prov open">Tony to confirm</span></td></tr>
+      <tr><td class="el">Guarantee sheet title</td><td class="was">"Credit or debit card" (production title)</td><td class="now">Content Guarantee</td><td><span class="prov mine">The sheet is named after the reason, not the field</span></td></tr>
+      <tr><td class="el">Guarantee sheet line</td><td class="was">Production paragraph + "Learn more"</td><td class="now">$0 today. We only charge the $52 order if the campaign ends with nothing posted, and you'll always get a final warning first. Learn more</td><td><span class="prov decided">Facts decided Aug 19 to 20</span></td></tr>
+      <tr><td class="el">Consent line</td><td class="was">"By saving your card, you agree to the Content Guarantee Terms." (Tony, Aug 20)</td><td class="now">Unchanged</td><td><span class="prov decided">Tony Aug 20 · no checkbox</span></td></tr>
+      <tr><td class="el">Guarantee CTA</td><td class="was">"Save and Continue" (production)</td><td class="now">Save and Continue</td><td><span class="prov decided">Production</span></td></tr>
+      <tr><td class="el">Pay sheet title</td><td class="was">none</td><td class="now">Pay $52 now</td><td><span class="prov mine">New</span></td></tr>
+      <tr><td class="el">Pay sheet line</td><td class="was">none</td><td class="now">You'll get the full $52 back on this card once your post is verified. You keep the products either way.</td><td><span class="prov mine">New · no timeline (Julia, Aug 20 rule)</span></td></tr>
+      <tr><td class="el">Pay CTA</td><td class="was">none</td><td class="now">Pay $52</td><td><span class="prov mine">New</span></td></tr>
+      <tr><td class="el">Pay sheet foot line</td><td class="was">none</td><td class="now">Receipt by email. The refund goes back to this card.</td><td><span class="prov open">Legal: pay-now is a purchase; needs refund terms</span></td></tr>
+      <tr><td class="el">Lock line</td><td class="was">"Payments secured by Stripe. Benable never sees your card number." (production)</td><td class="now">Unchanged</td><td><span class="prov decided">Production</span></td></tr>
+      <tr><td class="el">Done, guarantee</td><td class="was">none</td><td class="now">You're set · We've sent your selection to 28 Litsea, and your order is covered. · Content Guarantee · Visa ···· 4242 · $0 today · Change</td><td><span class="prov mine">New</span></td></tr>
+      <tr><td class="el">Done, paid</td><td class="was">none</td><td class="now">You're set · We've sent your selection to 28 Litsea, and your order is paid. · Paid $52 · Visa ···· 4242 · refunded once your post is verified · Receipt</td><td><span class="prov mine">New</span></td></tr>
+      <tr><td class="el">Explainer sheet</td><td class="was">Rev 5 sheet (Tony, Aug 20; Katie's edits)</td><td class="now">Verbatim, amount $52 for this campaign</td><td><span class="prov decided">Rev 5 · phone number still a placeholder (E-29)</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ───────────────────────── 06 MECHANICS ───────────────────────── -->
+<section id="mech">
+  <div class="shead"><span class="no">06</span><h2>What pay-now takes to run</h2><span class="q">the option has to be real, so here is the machinery behind it</span></div>
+  <p class="intro">The guarantee path is the one already specified (Stripe SetupIntent, Katie's final-warning ladder, the charge console). Pay-now is new. It is a purchase with a conditional refund, which touches Stripe, the ops console, the data model and the terms. None of it is hard; all of it needs an owner.</p>
+  <div class="cols">
+    <div class="card">
+      <h3>Stripe</h3>
+      <ul>
+        <li><b>Guarantee:</b> SetupIntent, card saved off-session, nothing charged. Unchanged.</li>
+        <li><b>Pay-now:</b> PaymentIntent for the product price, charged immediately. The card is <b>not</b> saved unless the creator opts in; that is the honest difference between the two options for a privacy-minded creator.</li>
+        <li><b>Refund:</b> a full Stripe refund to the original payment method, triggered by the same event that releases a paid-campaign fee: Benable verifies the final links. Refund copy never names days.</li>
+        <li>3DS may fire at payment time (it already can at save time); the bank sheet is already designed in the ghosting study.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Data and ops</h3>
+      <ul>
+        <li><b>creator_campaign.order_cover</b> = guarantee | prepaid. Plus payment_intent_id, refund_status (none | due | refunded), and the amount at choice time (the amount ratchet already exists for the guarantee).</li>
+        <li><b>Katie's console</b> gets a second population: prepaid creators are never charged and never warned about a charge; they get a refund action that arms when the post is verified.</li>
+        <li>The deadline ladder texts still go to prepaid creators; only the charge language drops out. Copy already exists for the control arm ("marked incomplete").</li>
+        <li>Brand-side line unchanged: creators have posted, we are following up with the rest.</li>
+      </ul>
+    </div>
+    <div class="card warn">
+      <h3>Business calls before it can ship</h3>
+      <ul>
+        <li><b>Who keeps the money</b> when a prepaid creator never posts? The brand shipped free product; the creator paid Benable. Remit to the brand, or keep it as the guarantee would have. Tony's call.</li>
+        <li><b>Terms.</b> The Content Guarantee Terms cover the saved card. A purchase with a conditional refund needs its own two paragraphs (refund condition, no refund if no post, product kept). Julia's legal pass.</li>
+        <li><b>Test design.</b> Is the chooser a third arm next to card and no-card, or the replacement for the card arm once stalls cross the Aug 18 line (about 25% stalls with under 10 points of post-rate lift)?</li>
+      </ul>
+    </div>
+    <div class="card good">
+      <h3>What to measure</h3>
+      <ul>
+        <li>Chooser view → option tapped → sheet completed, per option. The number that matters is completion of the step versus today's inline card form.</li>
+        <li>Share choosing pay-now. If it rounds to zero, the option is doing its job as framing; if it is material, ops needs the refund flow on day one.</li>
+        <li>Stall at the sheet (opened, never completed) versus stall at the page (never tapped). They need different fixes: copy versus fear of the card.</li>
+        <li>Post rate by cover type, once a cohort closes. Prepaid creators have real money on the line, which is Stack Influence's whole model.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────── 07 DECISIONS ───────────────────────── -->
+<section id="decisions">
+  <div class="shead"><span class="no">07</span><h2>Decisions and open asks</h2><span class="q">who agreed what, and what is still on the table</span></div>
+  <div class="dlist">
+    <div class="drow"><span class="prov proposed">Proposed</span><div class="dt"><b>The chooser page, card as a sheet after tapping the free option, Recommended on the free option.</b><span class="who">Tony, Sep 10 2026, 5:10am CEST, group DM. Not agreed by anyone yet; built here so it can be judged in pixels.</span></div></div>
+    <div class="drow"><span class="prov decided">Decided</span><div class="dt"><b>Consent by saving the card, one line above the button, no checkbox.</b><span class="who">Tony, Aug 20 2026. Preserved inside the sheet.</span></div></div>
+    <div class="drow"><span class="prov decided">Decided</span><div class="dt"><b>Guarantee amount is the product price; no refund timeline is ever promised; the explainer's contact is kscalzo@benable.com.</b><span class="who">Julia, Aug 20 2026 (amount, timeline); Katie's edit kept by Julia (contact).</span></div></div>
+    <div class="drow"><span class="prov decided">Decided</span><div class="dt"><b>Top-block sentence: "We've sent your selection to 28 Litsea. Add a card for the Content Guarantee and you're set."</b><span class="who">Julia, Sep 9 2026. Its second half assumed the card sat below; this page adapts it to "Choose how to place the order and you're set." and marks that as an open re-bless.</span></div></div>
+    <div class="drow"><span class="prov mine">My call</span><div class="dt"><b>Cards are buttons (tap opens the sheet); Tony's order kept; numbers dropped; no Apple Pay; amount shown on the pay-now card and both sheets.</b><span class="who">Julia's prototype decisions, Sep 10. Each reversible in the template with one flag.</span></div></div>
+    <div class="drow"><span class="prov open">Open · Tony</span><div class="dt"><b>Option order (A or B), the question wording, whether "1) 2)" stay, and who keeps pay-now money on no-post.</b><span class="who">Also: does pay-now deserve Apple Pay, given production shows none for the save flow.</span></div></div>
+    <div class="drow"><span class="prov open">Open · Katie</span><div class="dt"><b>Refund step in the console, and whether prepaid creators get the same deadline ladder minus the charge language.</b><span class="who">The Aug 19 charge checklist gains a sibling: verify post → refund.</span></div></div>
+    <div class="drow"><span class="prov open">Open · Nisarg</span><div class="dt"><b>PaymentIntent path next to the SetupIntent, order_cover on creator_campaign, refund wiring to the link-verification event.</b><span class="who">Card sheet is the same Stripe element moved into a sheet; the Terms link must point at the published terms URL.</span></div></div>
+    <div class="drow"><span class="prov open">Open · Julia</span><div class="dt"><b>Re-bless the top-block sentence; refund terms for the pay-now path; whether the chooser is a third A/B arm or a replacement.</b><span class="who">Also still open from Sep 9: the em dash in the production card body, and whether the card step really holds the Shopify order.</span></div></div>
+  </div>
+</section>
+
+<!-- ───────────────────────── 08 HANDOFF ───────────────────────── -->
+<section id="handoff">
+  <div class="shead"><span class="no">08</span><h2>Interaction inventory</h2><span class="q">trigger → behavior → motion</span></div>
+  <p class="intro">One line per interaction, for whoever implements it. Motion is felt, not seen: sheets slide 24px and fade over 260ms ease-out; the scrim fades over 200ms; nothing else moves.</p>
+  <div class="inv">Option card tap/Enter   → sheet opens (guarantee or pay-now), scrim fades in 200ms, sheet 260ms ease-out; focus moves to the card number field
+Scrim tap / Esc         → sheet closes, no animation on exit beyond the scrim fade (exit ease-in 150ms); focus returns to the tapped card
+Learn more (in sheet)   → explainer sheet replaces the card sheet (tall sheet, 64px from top); Got it returns to the card sheet with fields preserved
+Card fields typing      → number groups in fours, expiry as MM/YY, CVC 3 to 4 digits; CTA enables when number, expiry, CVC, name and ZIP are complete
+Save and Continue       → loading spinner in place (label hidden, width unchanged) 700ms → sheet closes → page shows You're set + summary row + Continue
+Pay $52                 → same loading pattern; done state reads Paid $52 with Receipt instead of Change
+Change / Receipt        → out of scope: toast "Out of scope in this prototype"
+Continue                → Content step placeholder (stepper advances); Back returns to the done state
+Back chevron, View Brief, Terms link → out of scope: toast
+Variant C segment tap   → note and CTA label swap in place, no layout shift; consent line renders only for the guarantee segment
+Variant D footnote link → pay-now sheet opens over the current page</div>
+</section>
+
+<footer>The Choice Before the Card · built Sep 10 2026 for Tony's Sep 10 idea · fixture from the Sep 9 production screenshot (28 Litsea, Delivery step) · prices from 28litsea.com · companion to the creator ghosting study (card screen rev 5) on port 4234.</footer>
+
+</div>
+
+<script>
+/* ───────── data: schema-shaped, proposed contract ───────── */
+const DB = {
+  brand: { id: 'brand_28litsea', name: '28 Litsea', initial: '2', campaign_name: 'Get to Know 28 Litsea' },
+  creator_campaign: {
+    id: 'cc_9f2a', stage: 'delivery',
+    order_cover: null,            /* 'guarantee' | 'prepaid' */
+    guarantee_amount_cents: 5200,  /* product price at choice time; ratchets per E-12/E-13 */
+    payment_intent_id: null, refund_status: 'none',
+    selection: [
+      { sku: 'TN-WILDCITRUS-BO', name: 'Top Note // Wild Citrus Body Oil', price_cents: 2400 },
+      { sku: 'BWF-EXFOLIANT', name: 'Blended With Flowers + Exfoliant For Body', price_cents: 2800 }
+    ]
+  },
+  contact: { email: 'kscalzo@benable.com', phone: '(XXX) XXX-XXXX' } /* PLACEHOLDER: E-29 phone number */
+};
+const AMOUNT = '$' + (DB.creator_campaign.guarantee_amount_cents / 100);
+const B = DB.brand.name;
+
+/* ───────── copy deck: every state's words in one place ───────── */
+const COPY = {
+  title: 'Your picks are in',
+  lede: `We've sent your selection to ${B}. Choose how to place the order and you're set.`,
+  ledeInline: `We've sent your selection to ${B}. Add a card for the Content Guarantee and you're set.`,
+  ledeSeg: `We've sent your selection to ${B}. One step left and you're set.`,
+  question: 'How do you want to place the order?',
+  opt: {
+    paynow:    { title: 'Pay now, get reimbursed', body: `Pay the <b>${AMOUNT}</b> order now. Once you post, you get the full order cost back.` },
+    guarantee: { tag: 'Recommended', title: 'Free order, Content Guarantee', body: `${B} covers your order, you don't pay anything. You add a card as a guarantee, and we only charge the order if you never post.` }
+  },
+  sheet: {
+    guarantee: { title: 'Content Guarantee', sub: `$0 today. We only charge the ${AMOUNT} order if the campaign ends with nothing posted, and you'll always get a final warning first. <a href="#" data-act="explainer">Learn more</a>`, cta: 'Save and Continue', consent: 'By saving your card, you agree to the <a href="#" data-act="toast">Content Guarantee Terms</a>.' },
+    paynow:    { title: `Pay <span class="amt">${AMOUNT}</span> now`, sub: `You'll get the full ${AMOUNT} back on this card once your post is verified. You keep the products either way.`, cta: `Pay ${AMOUNT}`, consent: 'Receipt by email. The refund goes back to this card.' }
+  },
+  lock: 'Payments secured by Stripe. Benable never sees your card number.',
+  inline: { section: 'Credit or debit card', para: `To provide brands with our Content Guarantee, all creators are required to have a valid credit or debit card on file. You won't be charged today, and you'll always receive a final warning first.` },
+  seg: {
+    guarantee: { label: 'Free + Content Guarantee', note: `<b>$0 today.</b> ${B} covers your order. We only charge the ${AMOUNT} order if the campaign ends with nothing posted, and you'll always get a final warning first. <a href="#" data-act="explainer">Learn more</a>` },
+    paynow:    { label: 'Pay now, get reimbursed', note: `<b>Pay ${AMOUNT} now.</b> You get the full ${AMOUNT} back on this card once your post is verified. You keep the products either way.` }
+  },
+  footnote: `Rather not keep a card on file? <a href="#" data-act="open-paynow">Pay for the order now</a> and get it back after you post.`,
+  done: {
+    title: `You're set`,
+    guarantee: { lede: `We've sent your selection to ${B}, and your order is covered.`, row: 'Content Guarantee', sub: 'Visa ···· 4242 · $0 today', act: 'Change' },
+    paynow:    { lede: `We've sent your selection to ${B}, and your order is paid.`, row: `Paid ${AMOUNT}`, sub: 'Visa ···· 4242 · refunded once your post is verified', act: 'Receipt' },
+    cta: 'Continue'
+  },
+  explainer: {
+    title: 'The Content Guarantee',
+    what: { h: 'What is the Content Guarantee?', p: 'Brands on Benable incur significant costs to provide creators with products and experiences, and Benable guarantees them that every collab results in content. We know each creator who participates is committed to that, and your card on file is what backs that guarantee.' },
+    when: { h: 'When would my card be charged?', p: `Only if a campaign closes with the product kept, nothing posted, and no reply from you. Before any charge, you'll receive a final warning by text and email, with time to post or reply and put things right. It would cover the product price, <b>${AMOUNT} for this campaign,</b> with no additional fees.` },
+    other: { h: 'Other questions?', p: `Shoot a note to <b>${DB.contact.email}</b> or text us at <b>${DB.contact.phone}</b> with any questions about the Content Guarantee.` },
+    cta: 'Got it!'
+  },
+  toast: 'Out of scope in this prototype',
+  contentStep: { title: 'Content', sub: 'Out of scope for this prototype. This is where the brief, deadline and draft upload live.' }
+};
+
+/* ───────── glyphs (inline SVG, never emoji) ───────── */
+const G = {
+  chevL: '<svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2 2 10l8 8"/></svg>',
+  chevR: '<svg width="9" height="16" viewBox="0 0 9 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 1.5 7.5 8l-6 6.5"/></svg>',
+  lock: '<svg width="14" height="16" viewBox="0 0 14 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="7" width="11" height="8" rx="1.6"/><path d="M4 7V4.8a3 3 0 0 1 6 0V7"/></svg>',
+  card: '<svg width="20" height="16" viewBox="0 0 20 16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="1" y="1.5" width="18" height="13" rx="2.2"/><path d="M1 6h18"/></svg>',
+  check: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 7 13.5 15 4.5"/></svg>',
+  bang: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 3v7"/><circle cx="9" cy="14.2" r="1.1" fill="currentColor" stroke="none"/></svg>',
+  wifi: '<i style="width:17px;height:11px;border-radius:2.5px"></i><i style="width:15px;height:11px"></i><i style="width:24px;height:12px;border-radius:3px"></i>'
+};
+
+/* ───────── state ───────── */
+function freshState(variant){
+  return { variant: variant || 'A', screen: 'delivery', sheet: null, choice: null, done: false, seg: 'guarantee',
+           card: { number: '', exp: '', cvc: '', name: '', zip: '' } };
+}
+const DEMO_CARD = { number: '4242 4242 4242 4242', exp: '08/29', cvc: '123', name: 'Maya Chen', zip: '64108' };
+function cardComplete(c){
+  return c.number.replace(/\s/g,'').length === 16 && /^\d{2}\/\d{2}$/.test(c.exp) && c.cvc.length >= 3 && c.name.trim().length > 1 && c.zip.replace(/\D/g,'').length === 5;
+}
+
+/* ───────── render ───────── */
+function chrome(s){
+  const cur = s.screen === 'content' ? 2 : 1;
+  const steps = ['Product','Delivery','Content','Publish'].map((n,i)=>`<div class="st ${i<cur?'done':i===cur?'cur':''}"><i></i><span>${n}</span></div>`).join('');
+  return `
+  <div class="ph-status"><span>9:41</span><span class="ic">${G.wifi}</span></div>
+  <header class="ph-head">
+    <button class="bk" data-act="${s.screen==='content'?'back-to-delivery':'toast'}" aria-label="Back">${G.chevL}</button>
+    <span class="av" aria-hidden="true">${DB.brand.initial}</span>
+    <div class="tt"><div class="bn">${DB.brand.name}</div><div class="cn">${DB.brand.campaign_name}</div></div>
+    <button class="vb" data-act="toast">View Brief</button>
+  </header>
+  <nav class="ph-stepper" aria-label="Collab steps">${steps}</nav>`;
+}
+function fields(s){
+  const c = s.card;
+  return `<div class="flds">
+    <label class="fld card"><span class="cc" aria-hidden="true"></span><input class="num" inputmode="numeric" autocomplete="cc-number" placeholder="Card number" value="${c.number}" data-f="number" aria-label="Card number"><input class="exp" inputmode="numeric" autocomplete="cc-exp" placeholder="EXP" value="${c.exp}" data-f="exp" aria-label="Expiry"><input class="cvc" inputmode="numeric" autocomplete="cc-csc" placeholder="CVC" value="${c.cvc}" data-f="cvc" aria-label="CVC"></label>
+    <label class="fld"><input autocomplete="cc-name" placeholder="Name on card" value="${c.name}" data-f="name" aria-label="Name on card"></label>
+    <div class="fld-row"><div class="fld static" aria-label="Country">United States</div><label class="fld"><input inputmode="numeric" autocomplete="postal-code" placeholder="ZIP" value="${c.zip}" data-f="zip" aria-label="ZIP"></label></div>
+  </div>`;
+}
+function lockLine(){ return `<div class="ph-lock">${G.lock}<span>${COPY.lock}</span></div>`; }
+function ctaHTML(label, act, s){
+  const dis = cardComplete(s.card) ? '' : 'disabled';
+  return `<button class="ph-cta" data-act="${act}" ${dis}><span class="lbl">${label}</span><span class="spin" aria-hidden="true"></span></button>`;
+}
+function optionCard(kind, s){
+  const o = COPY.opt[kind];
+  const rec = kind === 'guarantee';
+  return `<button class="opt ${rec?'is-rec':''}" data-act="open-${kind}" aria-describedby="">
+    <span class="ot">${rec?`<span class="tag">${o.tag}</span>`:''}<span class="ttl">${o.title}</span><span class="bd">${o.body}</span></span>
+    <span class="chev" aria-hidden="true">${G.chevR}</span></button>`;
+}
+function bodyChooser(s){
+  if (s.done) return bodyDone(s);
+  const order = s.variant === 'B' ? ['guarantee','paynow'] : ['paynow','guarantee'];
+  return `<div><h1 class="ph-title">${COPY.title}</h1><p class="ph-lede">${COPY.lede}</p></div>
+  <h2 class="ph-q">${COPY.question}</h2>
+  <div class="ph-opts">${order.map(k=>optionCard(k,s)).join('')}</div>`;
+}
+function bodyDone(s){
+  const d = COPY.done[s.choice];
+  return `<div><h1 class="ph-title">${COPY.done.title}</h1><p class="ph-lede">${d.lede}</p></div>
+  <div class="sum"><span class="sic" aria-hidden="true">${s.choice==='guarantee'?G.card:G.check}</span><span class="st"><b>${d.row}</b><span>${d.sub}</span></span><button class="act" data-act="toast">${d.act}</button></div>
+  <div class="ph-foot"><button class="ph-cta" data-act="continue"><span class="lbl">${COPY.done.cta}</span></button></div>`;
+}
+function bodySeg(s){
+  if (s.done) return bodyDone(s);
+  const k = s.seg; const sg = COPY.seg[k]; const sh = COPY.sheet[k];
+  return `<div><h1 class="ph-title">${COPY.title}</h1></div>
+  <div class="seg" role="group" aria-label="How to place the order">
+    <button data-act="seg-guarantee" aria-pressed="${k==='guarantee'}">${COPY.seg.guarantee.label}</button>
+    <button data-act="seg-paynow" aria-pressed="${k==='paynow'}">${COPY.seg.paynow.label}</button>
+  </div>
+  <p class="seg-note">${sg.note}</p>
+  ${fields(s)}
+  <div class="ph-foot">${k==='guarantee'?`<p class="ph-consent">${sh.consent}</p>`:''}${ctaHTML(sh.cta, 'save-'+k, s)}${lockLine()}</div>`;
+}
+function bodyInline(s){
+  if (s.done) return bodyDone(s);
+  const sh = COPY.sheet.guarantee;
+  return `<div><h1 class="ph-title">${COPY.title}</h1><p class="ph-lede">${COPY.ledeInline}</p></div>
+  <h2 class="ph-sec">${COPY.inline.section}</h2>
+  <p class="ph-para">${COPY.inline.para}<br><a href="#" data-act="explainer">Learn more</a></p>
+  ${fields(s)}
+  <div class="ph-foot"><p class="ph-consent">${sh.consent}</p>${ctaHTML(sh.cta,'save-guarantee',s)}${lockLine()}<p class="ph-hint">${COPY.footnote}</p></div>`;
+}
+function bodyContent(){
+  return `<div class="ph-empty"><b>${COPY.contentStep.title}</b><span>${COPY.contentStep.sub}</span><button class="ph-cta" data-act="back-to-delivery"><span class="lbl">Back to Delivery</span></button></div>`;
+}
+function sheetHTML(s){
+  if (!s.sheet) return '';
+  if (s.sheet === 'explainer'){
+    const e = COPY.explainer;
+    return `<button class="sh-dim" data-act="close" aria-label="Close"></button>
+    <div class="sh tall" role="dialog" aria-modal="true" aria-label="${e.title}">
+      <div class="grab"></div>
+      <div class="sh-head"><h2 class="sh-title">${e.title}</h2></div>
+      <div class="sh-body">
+        <div class="gcard"><span class="gico" aria-hidden="true">${G.check}</span><h5>${e.what.h}</h5><p>${e.what.p}</p></div>
+        <div class="gcard"><span class="gico" aria-hidden="true">${G.bang}</span><h5>${e.when.h}</h5><p>${e.when.p}</p></div>
+        <div class="oq"><h5>${e.other.h}</h5><p>${e.other.p}</p></div>
+      </div>
+      <div class="sh-foot"><button class="ph-cta" data-act="explainer-back"><span class="lbl">${e.cta}</span></button></div>
+    </div>`;
+  }
+  const k = s.sheet; const sh = COPY.sheet[k];
+  return `<button class="sh-dim" data-act="close" aria-label="Close"></button>
+  <div class="sh" role="dialog" aria-modal="true" aria-label="${k==='guarantee'?'Content Guarantee':'Pay now'}">
+    <div class="grab"></div>
+    <div class="sh-head"><h2 class="sh-title">${sh.title}</h2><p class="sh-sub">${sh.sub}</p></div>
+    ${fields(s)}
+    <div class="sh-foot"><p class="ph-consent">${sh.consent}</p>${ctaHTML(sh.cta, 'save-'+k, s)}${lockLine()}</div>
+  </div>`;
+}
+function phoneHTML(s){
+  let body;
+  if (s.screen === 'content') body = bodyContent();
+  else if (s.variant === 'C') body = bodySeg(s);
+  else if (s.variant === 'D') body = bodyInline(s);
+  else body = bodyChooser(s);
+  const tight = (s.variant === 'C' || s.variant === 'D') && s.screen !== 'content' && !s.done;
+  return `${chrome(s)}<main class="ph-body ${tight?'tight':''}">${body}</main>${sheetHTML(s)}<div class="ph-toast" role="status"></div><div class="ph-home" aria-hidden="true"></div>`;
+}
+
+/* ───────── mount + events ───────── */
+function mount(el, s){
+  el.__state = s;
+  el.innerHTML = phoneHTML(s);
+  return el;
+}
+function render(el){ mount(el, el.__state); }
+function toast(el){
+  const t = el.querySelector('.ph-toast'); if (!t) return;
+  t.textContent = COPY.toast; t.classList.add('on');
+  clearTimeout(el.__tt); el.__tt = setTimeout(()=>t.classList.remove('on'), 1600);
+}
+function formatField(f, v){
+  if (f === 'number') return v.replace(/\D/g,'').slice(0,16).replace(/(\d{4})(?=\d)/g,'$1 ');
+  if (f === 'exp'){ const d = v.replace(/\D/g,'').slice(0,4); return d.length > 2 ? d.slice(0,2)+'/'+d.slice(2) : d; }
+  if (f === 'cvc') return v.replace(/\D/g,'').slice(0,4);
+  if (f === 'zip') return v.replace(/\D/g,'').slice(0,5);
+  return v.slice(0,60);
+}
+function wire(el){
+  el.addEventListener('click', e=>{
+    const a = e.target.closest('[data-act]'); if (!a || !el.contains(a)) return;
+    e.preventDefault();
+    const s = el.__state; const act = a.dataset.act;
+    if (act === 'toast') return toast(el);
+    if (act === 'open-guarantee' || act === 'open-paynow'){ s.sheet = act.slice(5); s.__opener = act; render(el); focusFirst(el); return; }
+    if (act === 'close'){ s.sheet = null; render(el); refocus(el, s); return; }
+    if (act === 'explainer'){ s.__from = s.sheet; s.sheet = 'explainer'; render(el); return; }
+    if (act === 'explainer-back'){ s.sheet = s.__from || null; s.__from = null; render(el); if (s.sheet) focusFirst(el); return; }
+    if (act.startsWith('seg-')){ s.seg = act.slice(4); render(el); return; }
+    if (act.startsWith('save-')){
+      if (a.disabled) return;
+      a.classList.add('is-loading'); a.setAttribute('aria-busy','true');
+      setTimeout(()=>{ s.choice = act.slice(5); s.done = true; s.sheet = null; render(el); }, 700);
+      return;
+    }
+    if (act === 'continue'){ s.screen = 'content'; render(el); return; }
+    if (act === 'back-to-delivery'){ s.screen = 'delivery'; render(el); return; }
+  });
+  el.addEventListener('input', e=>{
+    const inp = e.target.closest('input[data-f]'); if (!inp) return;
+    const f = inp.dataset.f; const v = formatField(f, inp.value);
+    if (inp.value !== v) inp.value = v;
+    el.__state.card[f] = v;
+    const cta = el.querySelector('.ph-cta[data-act^="save-"]');
+    if (cta) cta.disabled = !cardComplete(el.__state.card);
+  });
+  el.addEventListener('keydown', e=>{
+    if (e.key === 'Escape' && el.__state.sheet){ el.__state.sheet = null; render(el); refocus(el, el.__state); }
+  });
+}
+function focusFirst(el){ const i = el.querySelector('.sh input'); if (i) i.focus(); }
+function refocus(el, s){ const b = s.__opener ? el.querySelector(`[data-act="${s.__opener}"]`) : null; if (b) b.focus(); }
+
+/* ───────── live phone ───────── */
+const live = document.getElementById('live');
+mount(live, freshState('A')); wire(live);
+
+/* OUT-OF-SCOPE: state rail */
+const rail = document.getElementById('rail');
+rail.addEventListener('click', e=>{
+  const b = e.target.closest('button'); if (!b) return;
+  rail.querySelectorAll('button').forEach(x=>x.classList.toggle('on', x===b));
+  if (b.dataset.fill){ Object.assign(live.__state.card, DEMO_CARD); render(live); return; }
+  const st = b.dataset.state; const s = freshState('A');
+  if (st === 'guarantee') s.sheet = 'guarantee';
+  if (st === 'filled'){ s.sheet = 'guarantee'; Object.assign(s.card, DEMO_CARD); }
+  if (st === 'explainer'){ s.sheet = 'explainer'; s.__from = 'guarantee'; }
+  if (st === 'paynow') s.sheet = 'paynow';
+  if (st === 'done-guarantee'){ s.done = true; s.choice = 'guarantee'; }
+  if (st === 'done-paynow'){ s.done = true; s.choice = 'paynow'; }
+  if (st === 'content') s.screen = 'content';
+  mount(live, s);
+  live.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+});
+
+/* ───────── static galleries ───────── */
+function cell(label, cap, s, liveWire, scrollToEnd){
+  const wrap = document.createElement('div'); wrap.className = 'pcell';
+  wrap.innerHTML = `<div class="ph-scale"><div class="ph" aria-label="${label}"></div></div><p class="ph-cap"><b>${label}</b>${cap}</p>`;
+  const el = wrap.querySelector('.ph'); mount(el, s); if (liveWire) wire(el);
+  if (scrollToEnd){ const b = el.querySelector('.ph-body'); if (b) requestAnimationFrame(()=>{ b.scrollTop = b.scrollHeight; }); }
+  return wrap;
+}
+const gal = document.getElementById('gallery');
+[
+  ['1 · The chooser', 'Page title, the Sep 9 sentence adapted, Tony\'s question, two cards. Nothing about a card yet.', (()=>freshState('A'))()],
+  ['2 · Guarantee sheet', 'Opens under the question. One line of why, the fields, the consent line, Save and Continue disabled.', (()=>{const s=freshState('A'); s.sheet='guarantee'; return s;})()],
+  ['3 · Filled', 'The moment the fields are complete the button comes alive. Same width, no layout shift.', (()=>{const s=freshState('A'); s.sheet='guarantee'; Object.assign(s.card, DEMO_CARD); return s;})()],
+  ['4 · Explainer', 'Learn more opens the rev-5 sheet verbatim, amount $52. Got it returns to the card sheet with fields preserved.', (()=>{const s=freshState('A'); s.sheet='explainer'; s.__from='guarantee'; return s;})()],
+  ['5 · Pay-now sheet', 'Same fields, the button says Pay $52, the refund promise carries no date.', (()=>{const s=freshState('A'); s.sheet='paynow'; Object.assign(s.card, DEMO_CARD); return s;})()],
+  ['6 · Done', 'You\'re set. The summary row says what the card is for and what happens next; Continue moves to Content.', (()=>{const s=freshState('A'); s.done=true; s.choice='guarantee'; return s;})()]
+].forEach(([l,c,s])=>gal.appendChild(cell(l,c,s,false)));
+
+const ag = document.getElementById('alts-gallery');
+[
+  ['B · Recommended first', 'Same cards, order swapped. Good news before the price.', (()=>freshState('B'))(), true],
+  ['C · Segmented, same page', 'No new page. The control above the fields swaps the note and the button label. Live: tap a segment.', (()=>freshState('C'))(), true],
+  ['C · pay-now segment', 'Same page with the pay-now segment active: consent line drops out, button says Pay $52.', (()=>{const s=freshState('C'); s.seg='paynow'; Object.assign(s.card, DEMO_CARD); return s;})(), true],
+  ['D · Footnote exit', 'Production page with the Sep 9 copy, plus one line under the lock text, shown scrolled to the button as the creator would see it. Live: tap the link.', (()=>freshState('D'))(), true, true]
+].forEach(([l,c,s,w,se])=>ag.appendChild(cell(l,c,s,w,se)));
+</script>
+</body>
+</html>
