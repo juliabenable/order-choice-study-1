@@ -11,15 +11,18 @@ PURPOSE   Proves Tony's Sep 10 idea: a chooser page before the card step
           with the card entry moved into a bottom sheet that opens from the
           chosen option. Fixture = the 28 Litsea collab, Delivery step, from
           the production screenshot Julia sent Sep 9 2026.
-SCOPE     Working here: chooser -> tap option -> bottom sheet (guarantee card
-          save / pay-now charge) -> done state -> Continue. Learn more opens the
-          rev-5 Content Guarantee explainer as a stacked sheet. Card fields
-          validate; CTA enables when complete; loading state on save.
-          Alternates B (recommended first), C (segmented, same page) and
-          D (footnote exit) render from the same template.
-OUT       Rendered but inert: back chevron, View Brief, Change, Receipt,
-          Content Guarantee Terms link (toast). Not built: address, Content
-          and Publish steps, 3DS, declines, settings.
+SCOPE     Working here: chooser -> free option -> bottom sheet (guarantee card
+          save) -> done state -> Continue; chooser -> pay now -> closed-door
+          page (Tony's copy, Sep 10 6:37pm CEST) -> Continue with Content
+          Guarantee opens the same sheet over it, or Back. Learn more opens
+          the rev-5 explainer as a stacked sheet. Card fields validate; CTA
+          enables when complete; loading on save. Alternates B (recommended
+          first), C (segmented, same page) and D (footnote exit) render from
+          the same template; their pay-now paths lead to the closed door.
+OUT       Rendered but inert: back chevron, View Brief, Change, Content
+          Guarantee Terms link (toast). Not built: address, Content and
+          Publish steps, 3DS, declines, settings. Removed Sep 10 when the
+          door closed: the pay-now payment sheet.
 DATA      const DB below is schema-shaped; field names are the proposed
           contract (order_cover, payment_intent_id, refund_status). Prices are
           real 28 Litsea retail prices (28litsea.com, Sep 10 2026).
@@ -28,14 +31,18 @@ DECISIONS Deliberate choices, do not "fix":
             Continue (Tony: "they tap number two and then they put in the
             credit card").
           - Tony's order kept: pay-now first, Recommended second. B swaps it.
+          - Pay now is a closed door (Tony): a page, not a sheet, copy
+            verbatim, brand and amount dynamic. Continue opens the guarantee
+            sheet over the page so the headline stays visible.
           - No Apple Pay: the Sep 9 production screenshot has none.
           - No refund timeline anywhere (Julia, Aug 20 rule).
           - No em dashes in any copy (house rule).
           - Consent line stays adjacent to the save button (Tony, Aug 20:
             no checkbox).
-OPEN      See section 06 on the page. Headline items: who keeps the pay-now
-          money; option order; question wording; re-bless the top-block
-          sentence (Sep 9 decision assumed the card sat below it).
+OPEN      See section 07 on the page. Headline items: option order; question
+          wording; door as page or sheet; the "for this campaign" qualifier;
+          re-bless the top-block sentence (Sep 9 decision assumed the card
+          sat below it).
 QA        Passes run: console/token/resize(393,320 phone; 1440,1280,768 page)/
           states/keyboard/long-content/contrast/proof, Sep 10 2026.
 ──────────────────────────────────────────────────
@@ -327,6 +334,15 @@ footer{margin-top:64px;font-size:var(--fs-12);color:var(--ink-5);line-height:1.6
 .ph-note{font-size:var(--pf-15);line-height:1.45;color:var(--p-ink-2);text-align:center;padding:0 8px}
 .ph-hint{font-size:var(--pf-15);line-height:1.45;color:var(--p-ink-2);text-align:center;padding:0 8px}
 
+/* the closed door (Tony's page): small line, headline, body, checklist, CTA, Back */
+.ph-kick{font-size:var(--pf-15);line-height:1.4;color:var(--p-ink-2);margin-bottom:6px}
+.chk{list-style:none;display:flex;flex-direction:column;gap:12px;margin-top:-4px}
+.chk li{display:flex;align-items:center;gap:12px;font-size:var(--pf-17);line-height:1.3;color:var(--p-ink)}
+.chk .ci{width:26px;height:26px;border-radius:50%;background:var(--p-accent-wash);color:var(--p-accent-deep);display:grid;place-items:center;flex:none}
+.chk .ci svg{width:14px;height:14px}
+.ph-back{font-size:var(--pf-17);font-weight:600;color:var(--p-ink-2);background:none;border:none;min-height:44px;width:100%;text-align:center;transition:color var(--t-fast)}
+.ph-back:hover{color:var(--p-ink)}
+
 /* segmented control (variant C) */
 .seg{display:flex;background:var(--p-line-soft);border-radius:12px;padding:3px;gap:2px;margin-top:-10px}
 .seg button{flex:1;min-height:44px;border:none;border-radius:10px;background:none;font-size:var(--pf-15);font-weight:500;color:var(--p-ink-2);padding:0 8px;line-height:1.2;transition:background-color var(--t-fast),color var(--t-fast)}
@@ -376,9 +392,10 @@ footer{margin-top:64px;font-size:var(--fs-12);color:var(--ink-5);line-height:1.6
 <header class="hero">
   <div class="kicker">Content Guarantee · the step before the card</div>
   <h1>The Choice Before the Card</h1>
-  <p class="lede">Tony's Sep 10 idea, built: instead of landing on a card field, the creator lands on a question, <b>how do you want to place the order</b>, with two answers. Pay now and get reimbursed, or a free order backed by the Content Guarantee, marked Recommended. Tapping the free option opens the card as a bottom sheet, so the card arrives with its reason attached. This page holds the range we looked at first, the flow in the real 28 Litsea Delivery-step chrome, three alternates, the copy deck, and what pay-now would take to run.</p>
+  <p class="lede">Tony's Sep 10 idea, built: instead of landing on a card field, the creator lands on a question, <b>how do you want to place the order</b>, with two answers. Pay now and get reimbursed, or a free order backed by the Content Guarantee, marked Recommended. Tapping the free option opens the card as a bottom sheet, so the card arrives with its reason attached. Later the same day Tony closed the other door: tapping pay now shows a page that says the brand is paying, gives three reasons, and hands the creator to the guarantee. This page holds the range we looked at first, the flow in the real 28 Litsea Delivery-step chrome, three alternates, the copy deck, and what changes for engineering.</p>
   <div class="meta">
     <span class="chip on">Proposed by Tony · Sep 10 2026, 5:10am CEST · group DM with Katie and Julia</span>
+    <span class="chip on">Door closed by Tony · Sep 10 2026, 6:37pm CEST · copy verbatim</span>
     <span class="chip">Fixture: 28 Litsea, Delivery step, Sep 9 production screenshot</span>
     <span class="chip">393 × 852 · clickable</span>
     <span class="chip">Real prices from 28litsea.com</span>
@@ -387,7 +404,7 @@ footer{margin-top:64px;font-size:var(--fs-12);color:var(--ink-5);line-height:1.6
 
 <!-- ───────────────────────── 00 THE IDEA ───────────────────────── -->
 <section id="idea">
-  <div class="shead"><span class="no">00</span><h2>The idea, in Tony's words</h2><span class="q">Sep 10 2026 · not yet decided</span></div>
+  <div class="shead"><span class="no">00</span><h2>The idea, in Tony's words</h2><span class="q">Sep 10 2026 · chooser proposed 5:10am · door closed 6:37pm</span></div>
   <p class="intro">The trigger is a hypothesis, not a stall count yet: <b>if more creators have a problem with the Content Guarantee the way it's framed today</b>, this is one way to solve it. The card A/B (Aug 18) is still the running test. This design is built so it is ready the moment the numbers call for it.</p>
   <div class="quote">
     <div class="who"><span class="av">T</span><b>Tony Staehelin</b> · Sep 10 2026, 5:10am CEST · group DM (Tony, Katie, Julia) <span class="tag">Proposed</span></div>
@@ -403,8 +420,23 @@ Recommended
 The brand covers your order, you don't pay anything. You add a credit card to Benable as a guarantee, and we only charge the order if you never post the content.</p>
     <p>I feel like that's less scary than seeing a credit card field. So they tap number two and then they put in the credit card and they know what it's for.</p>
   </div>
+  <div class="quote">
+    <div class="who"><span class="av">T</span><b>Tony Staehelin</b> · Sep 10 2026, 6:37pm CEST, same DM <span class="tag" style="color:var(--green);border-color:var(--green);background:var(--green-wash)">Decided</span></div>
+    <p>the real goal is to funnel them to the recommended. so for the other let's just close the door. when they click it: they see this page^</p>
+    <div class="tbl" style="margin-top:14px"><table style="min-width:0">
+      <tbody>
+        <tr><td class="el">Small line</td><td>Pay now isn't available for this campaign</td></tr>
+        <tr><td class="el">Headline</td><td>The brand is paying for your order</td></tr>
+        <tr><td class="el">Body</td><td>28 Litsea covers the $52 order directly. You just add a payment method to Benable as a guarantee, and it's only billed if you get your product and never post.</td></tr>
+        <tr><td class="el">Checklist</td><td>$0 out of pocket · No waiting to get paid back · Post, and you're never charged</td></tr>
+        <tr><td class="el">Button</td><td>Continue with Content Guarantee</td></tr>
+        <tr><td class="el">Text link</td><td>Back</td></tr>
+      </tbody>
+    </table></div>
+  </div>
   <div class="notes">
-    <div class="note"><span class="nd">1</span><span><b>What the idea is really doing.</b> Two things at once. It gives the creator a choice where there was a demand, which takes the sting out of "why do you want my card". And it puts a priced alternative next to the card, so $0 today reads as the generous option instead of a catch. Pay-now is a real path, not a prop: creators who will not keep a card on file exist, and for them it is the honest answer. It just has to stay genuinely usable or the page becomes a dark pattern.</span></div>
+    <div class="note"><span class="nd">1</span><span><b>What the idea is really doing.</b> It gives the creator a choice where there was a demand, which takes the sting out of "why do you want my card", and it puts a priced alternative next to the card so $0 today reads as the generous option instead of a catch. Tony's second message settles what the other option is: a door that closes. Tapping pay now shows a page that says the brand is paying, gives three reasons, and hands the creator to the guarantee. The choice is a framing device, and the page behind the door says so plainly rather than pretending.</span></div>
+    <div class="note"><span class="nd">4</span><span><b>One claim to keep true.</b> "Pay now isn't available for this campaign" implies some campaigns offer it. If none ever will, the honest line is "Pay now isn't available yet", or no qualifier at all. Flagged for Tony in section 07, not changed here.</span></div>
     <div class="note"><span class="nd">2</span><span><b>The risk it introduces.</b> The first thing the creator reads is a price. Until now money was invisible on this step. Tony's order (pay-now first) creates the relief read: "$52 now? Oh, or free." Alternate B keeps the good news first for the creator who never thought about money at all. That order is Tony's call, not settled here.</span></div>
     <div class="note"><span class="nd">3</span><span><b>What stays true from earlier decisions.</b> The consent line sits next to the save button, no checkbox (Tony, Aug 20). The guarantee amount is the product price (Julia, Aug 20). No refund timeline is ever promised (Julia, Aug 20). The contact on the explainer stays kscalzo@benable.com (Katie). The production screenshot from Sep 9 has no Apple Pay, so none is added here.</span></div>
   </div>
@@ -420,7 +452,7 @@ The brand covers your order, you don't pay anything. You add a credit card to Be
       <div class="rl"><span class="lt">A</span><h3>Tony's chooser</h3><span class="bt">Built · the flow</span></div>
       <div class="sk"><i class="h"></i><i class="m"></i><i class="s"></i><div class="bx"><i></i><i></i></div><div class="bx rec"><i></i><i></i><i></i></div></div>
       <p class="q">What if the card arrives with its alternative attached?</p>
-      <p class="v">Two option cards, pay-now first, <b>Recommended</b> on the free one. Tap opens the card as a sheet. The relief read is the whole point.</p>
+      <p class="v">Two option cards, pay-now first, <b>Recommended</b> on the free one. The free one opens the card as a sheet; pay now opens the closed door (Tony, later Sep 10). The relief read is the whole point.</p>
     </div>
 
     <div class="rc built">
@@ -434,14 +466,14 @@ The brand covers your order, you don't pay anything. You add a credit card to Be
       <div class="rl"><span class="lt">C</span><h3>Segmented, same page</h3><span class="bt">Built · alternate</span></div>
       <div class="sk"><i class="h"></i><i class="m"></i><div class="seg"><b></b><u></u></div><i class="m"></i><div class="fld"></div><div class="fld"></div><div class="btn dis"></div></div>
       <p class="q">What if we do not add a page?</p>
-      <p class="v">A two-segment control above today's fields; the CTA morphs. Zero extra taps, but the card field is on screen from the start, which is what Tony wants to avoid.</p>
+      <p class="v">A two-segment control above today's fields. Zero extra taps, but the card field is on screen from the start, which is what Tony wants to avoid. With the door closed, the pay-now segment leads to the same closed-door page.</p>
     </div>
 
     <div class="rc built">
       <div class="rl"><span class="lt">D</span><h3>Footnote exit</h3><span class="bt">Built · alternate</span></div>
       <div class="sk"><i class="h"></i><i class="m"></i><i class="s"></i><div class="fld"></div><div class="fld"></div><div class="btn dis"></div><i class="lnk"></i></div>
       <p class="q">What if the choice is an exit, not a menu?</p>
-      <p class="v">Today's page plus one quiet line under the button: pay now instead. Smallest change; only helps the creator who already objects.</p>
+      <p class="v">Today's page plus one quiet line under the button: pay now instead. Smallest change; only helps the creator who already objects, and with the door closed that line leads to the closed-door page.</p>
     </div>
 
     <div class="rc">
@@ -492,7 +524,7 @@ The brand covers your order, you don't pay anything. You add a credit card to Be
 <!-- ───────────────────────── 02 THE FLOW ───────────────────────── -->
 <section id="flow">
   <div class="shead"><span class="no">02</span><h2>The flow, built: Tony's chooser in the 28 Litsea chrome</h2><span class="q">tap either option · sheets are live · fields validate</span></div>
-  <p class="intro">Everything above the gray body is the production Delivery step as photographed on Sep 9: brand header, View Brief, the four-stage stepper. The body changes: the top block keeps the Sep 9 sentence and hands off to the question; two option cards replace the inline card form. Tap the free option and the card sheet slides up under the question, so the reason stays visible above it. Tap pay-now and the same sheet asks for a payment instead.</p>
+  <p class="intro">Everything above the gray body is the production Delivery step as photographed on Sep 9: brand header, View Brief, the four-stage stepper. The body changes: the top block keeps the Sep 9 sentence and hands off to the question; two option cards replace the inline card form. Tap the free option and the card sheet slides up under the question, so the reason stays visible above it. Tap pay now and the door closes: a page says the brand is paying, lists three reasons, and offers Continue with Content Guarantee or Back.</p>
   <div class="live-row">
     <div class="ph" id="live" aria-label="Live prototype: order choice before the card"></div>
     <div class="live-notes">
@@ -500,19 +532,18 @@ The brand covers your order, you don't pay anything. You add a credit card to Be
       <div class="note"><span class="nd">1</span><span><b>The question is the section title</b>, in Tony's words. The Sep 9 top block stays the page title, so the screen has one title and one question, not two equal headings (the Sep 9 open item).</span></div>
       <div class="note"><span class="nd">2</span><span><b>The cards are the actions.</b> No radio, no Continue button. Tony: "they tap number two and then they put in the credit card." The recommended card carries a purple edge and the Recommended tag; nothing else on the page uses color.</span></div>
       <div class="note"><span class="nd">3</span><span><b>The sheet explains itself in one line</b> and links the full explainer (the rev-5 sheet, verbatim, with $52). $0 today, charged only if nothing is posted, final warning first. The consent line sits above Save and Continue, as decided Aug 20.</span></div>
-      <div class="note"><span class="nd">4</span><span><b>Pay-now is real.</b> Same fields, the button says Pay $52, and the line under the title promises the refund without a date. The done state shows what was chosen, with Change.</span></div>
-      <div class="note"><span class="nd">5</span><span><b>Amount is dynamic.</b> $52 is the creator's actual selection: Top Note Wild Citrus Body Oil at $24 and the flower exfoliant at $28, real 28litsea.com prices. It appears in the pay-now card, both sheets and the explainer, and nowhere else.</span></div>
+      <div class="note"><span class="nd">4</span><span><b>The closed door is a page, not a sheet.</b> Tony's copy verbatim: small line, headline, body, three-line checklist, Continue with Content Guarantee, Back. Continue opens the same guarantee sheet over it, so "The brand is paying for your order" stays visible while the card is typed. Back returns to the chooser.</span></div>
+      <div class="note"><span class="nd">5</span><span><b>Amount is dynamic.</b> $52 is the creator's actual selection: Top Note Wild Citrus Body Oil at $24 and the flower exfoliant at $28, real 28litsea.com prices. It appears in the pay-now card, the closed-door body, the guarantee sheet and the explainer, and nowhere else.</span></div>
       <div class="note"><span class="nd">6</span><span><b>Keyboard works.</b> Tab through the cards, Enter opens the sheet, Esc or the scrim closes it. Use the rail below to jump to any state or fill a demo card.</span></div>
       <!-- OUT-OF-SCOPE: state-switcher rail, demo tooling -->
       <div class="rail" id="rail" aria-label="Prototype states">
         <span class="rt">Live phone · states</span>
         <button data-state="chooser" class="on">Chooser</button>
+        <button data-state="closed">Closed door</button>
         <button data-state="guarantee">Guarantee sheet</button>
         <button data-state="filled">Filled</button>
         <button data-state="explainer">Explainer</button>
-        <button data-state="paynow">Pay sheet</button>
-        <button data-state="done-guarantee">Done · guarantee</button>
-        <button data-state="done-paynow">Done · paid</button>
+        <button data-state="done">Done</button>
         <button data-state="content">Content step</button>
         <button data-fill="1">Fill demo card</button>
         <button data-state="reset">Reset</button>
@@ -524,26 +555,26 @@ The brand covers your order, you don't pay anything. You add a credit card to Be
 <!-- ───────────────────────── 03 STATES ───────────────────────── -->
 <section id="states">
   <div class="shead"><span class="no">03</span><h2>Every state, side by side</h2><span class="q">rendered from the same template as the live phone</span></div>
-  <p class="intro">The six states a creator can see on this step, static, for review at a glance. Fields in the filled sheet show the moment the button comes alive.</p>
+  <p class="intro">The six states a creator can see on this step, static, for review at a glance: the chooser, the closed door, the sheet empty and filled, the explainer, and done.</p>
   <div class="phones" id="gallery"></div>
 </section>
 
 <!-- ───────────────────────── 04 ALTERNATES ───────────────────────── -->
 <section id="alts">
   <div class="shead"><span class="no">04</span><h2>Alternates at full fidelity</h2><span class="q">B swaps the order · C stays on one page · D is a footnote</span></div>
-  <p class="intro">Three ways to get most of the effect with a different shape. B is the same chooser with the good news first. C never leaves the current page: a segmented control sits above the fields and the button morphs between Save and Continue and Pay $52. D is the current page untouched, with one line under the lock text for the creator who would rather pay. C and D are live: the segments switch and the footnote opens the pay sheet.</p>
+  <p class="intro">Three ways to get most of the effect with a different shape. B is the same chooser with the good news first. C never leaves the current page: a segmented control sits above the fields and the button morphs between Save and Continue and Pay $52. D is the current page untouched, with one line under the lock text for the creator who would rather pay. C and D are live: the pay-now segment and the footnote both lead to the closed door.</p>
   <div class="phones" id="alts-gallery"></div>
   <div class="notes">
     <div class="note"><span class="nd">B</span><span><b>Recommended first</b> reads calmer. The creator who has never thought about money sees $0 before they see $52. The cost is anchoring: with the price second, the free option no longer arrives as relief. If the A/B shows the problem is fear of the card rather than the trade, B is the better shape.</span></div>
-    <div class="note"><span class="nd">C</span><span><b>Segmented</b> is the engineering-cheapest version: the card form and its Stripe element stay where they are, the control only swaps copy and the CTA. But the card field is still the first thing on the screen, so it does not deliver Tony's "less scary than seeing a credit card field".</span></div>
-    <div class="note"><span class="nd">D</span><span><b>Footnote</b> changes nothing for the creator who is fine with the card, and gives the one who objects a way through without Katie. It is the version to ship if pay-now is meant as an escape hatch rather than a framing device.</span></div>
+    <div class="note"><span class="nd">C</span><span><b>Segmented</b> is the engineering-cheapest version: the card form and its Stripe element stay where they are, the control is a label for the form and its pay-now segment opens the closed door. But the card field is still the first thing on the screen, so it does not deliver Tony's "less scary than seeing a credit card field".</span></div>
+    <div class="note"><span class="nd">D</span><span><b>Footnote</b> changes nothing for the creator who is fine with the card, and gives the one who objects a way to the closed door and its three reasons. It is the version to ship if the chooser page tests worse than today's form.</span></div>
   </div>
 </section>
 
 <!-- ───────────────────────── 05 COPY ───────────────────────── -->
 <section id="copy">
   <div class="shead"><span class="no">05</span><h2>Copy deck</h2><span class="q">Tony's words, what is built, and who decided what</span></div>
-  <p class="intro">Every string on the new step. Where Tony wrote the line, his version is shown first; edits are limited to the brand name, the amount and house rules (no em dashes, no refund timeline). The one line that needs a fresh decision is the top-block sentence: the Sep 9 wording assumed the card sat right below it.</p>
+  <p class="intro">Every string on the new step. Where Tony wrote the line, his version is shown first; edits are limited to the brand name, the amount and house rules (no em dashes, no refund timeline). Tony's second message supplied the closed-door page word for word; it is rendered verbatim with the brand and amount dynamic. The one line that needs a fresh decision is the top-block sentence: the Sep 9 wording assumed the card sat right below it.</p>
   <div class="tbl"><table>
     <thead><tr><th style="width:170px">Element</th><th>Source wording</th><th>Built</th><th style="width:190px">Status</th></tr></thead>
     <tbody>
@@ -560,13 +591,15 @@ The brand covers your order, you don't pay anything. You add a credit card to Be
       <tr><td class="el">Guarantee sheet line</td><td class="was">Production paragraph + "Learn more"</td><td class="now">$0 today. We only charge the $52 order if the campaign ends with nothing posted, and you'll always get a final warning first. Learn more</td><td><span class="prov decided">Facts decided Aug 19 to 20</span></td></tr>
       <tr><td class="el">Consent line</td><td class="was">"By saving your card, you agree to the Content Guarantee Terms." (Tony, Aug 20)</td><td class="now">Unchanged</td><td><span class="prov decided">Tony Aug 20 · no checkbox</span></td></tr>
       <tr><td class="el">Guarantee CTA</td><td class="was">"Save and Continue" (production)</td><td class="now">Save and Continue</td><td><span class="prov decided">Production</span></td></tr>
-      <tr><td class="el">Pay sheet title</td><td class="was">none</td><td class="now">Pay $52 now</td><td><span class="prov mine">New</span></td></tr>
-      <tr><td class="el">Pay sheet line</td><td class="was">none</td><td class="now">You'll get the full $52 back on this card once your post is verified. You keep the products either way.</td><td><span class="prov mine">New · no timeline (Julia, Aug 20 rule)</span></td></tr>
-      <tr><td class="el">Pay CTA</td><td class="was">none</td><td class="now">Pay $52</td><td><span class="prov mine">New</span></td></tr>
-      <tr><td class="el">Pay sheet foot line</td><td class="was">none</td><td class="now">Receipt by email. The refund goes back to this card.</td><td><span class="prov open">Legal: pay-now is a purchase; needs refund terms</span></td></tr>
+      <tr><td class="el">Closed door · small line</td><td class="was">"Pay now isn't available for this campaign" (Tony)</td><td class="now">Unchanged</td><td><span class="prov decided">Tony Sep 10</span><br><span class="prov open">Flag: "for this campaign" implies it exists elsewhere</span></td></tr>
+      <tr><td class="el">Closed door · headline</td><td class="was">"The brand is paying for your order" (Tony)</td><td class="now">Unchanged<br><span class="was">Alt: 28 Litsea is paying for your order</span></td><td><span class="prov decided">Tony Sep 10</span></td></tr>
+      <tr><td class="el">Closed door · body</td><td class="was">"28 Litsea covers the $52 order directly. You just add a payment method to Benable as a guarantee, and it's only billed if you get your product and never post." (Tony)</td><td class="now">Unchanged · brand and amount dynamic</td><td><span class="prov decided">Tony Sep 10</span><br><span class="prov open">"payment method" here, "card" on the sheet</span></td></tr>
+      <tr><td class="el">Closed door · checklist</td><td class="was">"$0 out of pocket" · "No waiting to get paid back" · "Post, and you're never charged" (Tony)</td><td class="now">Unchanged</td><td><span class="prov decided">Tony Sep 10</span></td></tr>
+      <tr><td class="el">Closed door · button</td><td class="was">"Continue with Content Guarantee" (Tony)</td><td class="now">Unchanged</td><td><span class="prov decided">Tony Sep 10</span></td></tr>
+      <tr><td class="el">Closed door · text link</td><td class="was">"Back" (Tony)</td><td class="now">Unchanged</td><td><span class="prov decided">Tony Sep 10</span></td></tr>
+      <tr><td class="el">Pay-now sheet</td><td class="was">Built this morning: Pay $52 now, full refund once your post is verified</td><td class="now">Removed</td><td><span class="prov decided">Superseded by the closed door, Tony Sep 10</span></td></tr>
       <tr><td class="el">Lock line</td><td class="was">"Payments secured by Stripe. Benable never sees your card number." (production)</td><td class="now">Unchanged</td><td><span class="prov decided">Production</span></td></tr>
       <tr><td class="el">Done, guarantee</td><td class="was">none</td><td class="now">You're set · We've sent your selection to 28 Litsea, and your order is covered. · Content Guarantee · Visa ···· 4242 · $0 today · Change</td><td><span class="prov mine">New</span></td></tr>
-      <tr><td class="el">Done, paid</td><td class="was">none</td><td class="now">You're set · We've sent your selection to 28 Litsea, and your order is paid. · Paid $52 · Visa ···· 4242 · refunded once your post is verified · Receipt</td><td><span class="prov mine">New</span></td></tr>
       <tr><td class="el">Explainer sheet</td><td class="was">Rev 5 sheet (Tony, Aug 20; Katie's edits)</td><td class="now">Verbatim, amount $52 for this campaign</td><td><span class="prov decided">Rev 5 · phone number still a placeholder (E-29)</span></td></tr>
     </tbody>
   </table></div>
@@ -574,44 +607,45 @@ The brand covers your order, you don't pay anything. You add a credit card to Be
 
 <!-- ───────────────────────── 06 MECHANICS ───────────────────────── -->
 <section id="mech">
-  <div class="shead"><span class="no">06</span><h2>What pay-now takes to run</h2><span class="q">the option has to be real, so here is the machinery behind it</span></div>
-  <p class="intro">The guarantee path is the one already specified (Stripe SetupIntent, Katie's final-warning ladder, the charge console). Pay-now is new. It is a purchase with a conditional refund, which touches Stripe, the ops console, the data model and the terms. None of it is hard; all of it needs an owner.</p>
+  <div class="shead"><span class="no">06</span><h2>What the closed door means for engineering</h2><span class="q">nothing new touches Stripe · one page, one event, one claim to keep true</span></div>
+  <p class="intro">With pay-now closed, the guarantee path is the only path, and it is the one already specified: Stripe SetupIntent, Katie's final-warning ladder, the charge console. What is new is one page in the collab flow, one event to log, and a sentence whose truth depends on a decision nobody has made yet.</p>
   <div class="cols">
     <div class="card">
-      <h3>Stripe</h3>
+      <h3>Stripe and data</h3>
       <ul>
-        <li><b>Guarantee:</b> SetupIntent, card saved off-session, nothing charged. Unchanged.</li>
-        <li><b>Pay-now:</b> PaymentIntent for the product price, charged immediately. The card is <b>not</b> saved unless the creator opts in; that is the honest difference between the two options for a privacy-minded creator.</li>
-        <li><b>Refund:</b> a full Stripe refund to the original payment method, triggered by the same event that releases a paid-campaign fee: Benable verifies the final links. Refund copy never names days.</li>
-        <li>3DS may fire at payment time (it already can at save time); the bank sheet is already designed in the ghosting study.</li>
+        <li><b>SetupIntent only</b>, unchanged from rev 5. The card sheet is the same Payment Element moved into a bottom sheet; the Terms link must point at the published terms URL.</li>
+        <li><b>No PaymentIntent, no refunds, no order_cover field.</b> Everyone who completes the step is a card-on-file creator.</li>
+        <li><b>Log the door.</b> One event, <b>paynow_door_viewed</b>, with campaign, creator, and whether they tapped Continue or Back. It is the only way to learn how many creators wanted the other option.</li>
       </ul>
     </div>
     <div class="card">
-      <h3>Data and ops</h3>
+      <h3>Ops and the ladder</h3>
       <ul>
-        <li><b>creator_campaign.order_cover</b> = guarantee | prepaid. Plus payment_intent_id, refund_status (none | due | refunded), and the amount at choice time (the amount ratchet already exists for the guarantee).</li>
-        <li><b>Katie's console</b> gets a second population: prepaid creators are never charged and never warned about a charge; they get a refund action that arms when the post is verified.</li>
-        <li>The deadline ladder texts still go to prepaid creators; only the charge language drops out. Copy already exists for the control arm ("marked incomplete").</li>
+        <li>Nothing changes for Katie: no second population, no refund step. The Aug 19 charge checklist stands as is.</li>
+        <li>The closed door has no exit. The Aug 18 rule holds: the waiver lives in Katie's email, never on screen.</li>
         <li>Brand-side line unchanged: creators have posted, we are following up with the rest.</li>
       </ul>
     </div>
     <div class="card warn">
-      <h3>Business calls before it can ship</h3>
+      <h3>A claim to keep true</h3>
       <ul>
-        <li><b>Who keeps the money</b> when a prepaid creator never posts? The brand shipped free product; the creator paid Benable. Remit to the brand, or keep it as the guarantee would have. Tony's call.</li>
-        <li><b>Terms.</b> The Content Guarantee Terms cover the saved card. A purchase with a conditional refund needs its own two paragraphs (refund condition, no refund if no post, product kept). Julia's legal pass.</li>
-        <li><b>Test design.</b> Is the chooser a third arm next to card and no-card, or the replacement for the card arm once stalls cross the Aug 18 line (about 25% stalls with under 10 points of post-rate lift)?</li>
+        <li><b>"Pay now isn't available for this campaign"</b> promises that some campaigns offer it. If none will, the line should read "isn't available yet" or lose the qualifier. Tony's call, flagged in section 07.</li>
+        <li><b>"payment method" on the door, "card" on the sheet.</b> The consent line ("By saving your card") is decided, so the sheet keeps card; the door could say card too.</li>
+        <li><b>Two phrasings of the charge condition.</b> The door says "billed if you get your product and never post"; the explainer says "product kept, nothing posted, and no reply from you". Same facts; worth one line in the terms pass.</li>
       </ul>
     </div>
     <div class="card good">
       <h3>What to measure</h3>
       <ul>
-        <li>Chooser view → option tapped → sheet completed, per option. The number that matters is completion of the step versus today's inline card form.</li>
-        <li>Share choosing pay-now. If it rounds to zero, the option is doing its job as framing; if it is material, ops needs the refund flow on day one.</li>
-        <li>Stall at the sheet (opened, never completed) versus stall at the page (never tapped). They need different fixes: copy versus fear of the card.</li>
-        <li>Post rate by cover type, once a cohort closes. Prepaid creators have real money on the line, which is Stack Influence's whole model.</li>
+        <li>Chooser view → tap free option vs tap pay now → sheet completed. Step completion versus today's inline card form is the number that decides the test.</li>
+        <li>Pay-now tap rate, and what happens behind the door: Continue, Back, or leave. A high Back-then-leave rate means the door reads as a trick.</li>
+        <li>Stall at the sheet (opened, never completed) versus stall at the page (never tapped). Different fixes: copy versus fear of the card.</li>
+        <li>Post rate for the chooser cohort against the plain card cohort once a campaign closes.</li>
       </ul>
     </div>
+  </div>
+  <div class="notes">
+    <div class="note"><span class="nd">P</span><span><b>Parked, in case the door ever opens.</b> Pay-now as a real path would need a PaymentIntent next to the SetupIntent, a full refund triggered by link verification (no timeline promised), refund terms since it is a purchase, a refund action in Katie's console, and a decision on who keeps the money when a prepaid creator never posts. None of it is needed now.</span></div>
   </div>
 </section>
 
@@ -619,15 +653,16 @@ The brand covers your order, you don't pay anything. You add a credit card to Be
 <section id="decisions">
   <div class="shead"><span class="no">07</span><h2>Decisions and open asks</h2><span class="q">who agreed what, and what is still on the table</span></div>
   <div class="dlist">
-    <div class="drow"><span class="prov proposed">Proposed</span><div class="dt"><b>The chooser page, card as a sheet after tapping the free option, Recommended on the free option.</b><span class="who">Tony, Sep 10 2026, 5:10am CEST, group DM. Not agreed by anyone yet; built here so it can be judged in pixels.</span></div></div>
+    <div class="drow"><span class="prov decided">Decided</span><div class="dt"><b>Pay now is a closed door. Tapping it shows a page with Tony's copy: The brand is paying for your order, three reasons, Continue with Content Guarantee, Back.</b><span class="who">Tony, Sep 10 2026, 6:37pm CEST, same DM ("the real goal is to funnel them to the recommended"). Built verbatim. Page rather than sheet is my call.</span></div></div>
+    <div class="drow"><span class="prov proposed">Direction</span><div class="dt"><b>The chooser page, card as a sheet after tapping the free option, Recommended on the free option.</b><span class="who">Tony, Sep 10 2026, 5:10am CEST, group DM. The 6:37pm message treats it as the plan; whether it ships still rides on the card A/B.</span></div></div>
     <div class="drow"><span class="prov decided">Decided</span><div class="dt"><b>Consent by saving the card, one line above the button, no checkbox.</b><span class="who">Tony, Aug 20 2026. Preserved inside the sheet.</span></div></div>
     <div class="drow"><span class="prov decided">Decided</span><div class="dt"><b>Guarantee amount is the product price; no refund timeline is ever promised; the explainer's contact is kscalzo@benable.com.</b><span class="who">Julia, Aug 20 2026 (amount, timeline); Katie's edit kept by Julia (contact).</span></div></div>
     <div class="drow"><span class="prov decided">Decided</span><div class="dt"><b>Top-block sentence: "We've sent your selection to 28 Litsea. Add a card for the Content Guarantee and you're set."</b><span class="who">Julia, Sep 9 2026. Its second half assumed the card sat below; this page adapts it to "Choose how to place the order and you're set." and marks that as an open re-bless.</span></div></div>
-    <div class="drow"><span class="prov mine">My call</span><div class="dt"><b>Cards are buttons (tap opens the sheet); Tony's order kept; numbers dropped; no Apple Pay; amount shown on the pay-now card and both sheets.</b><span class="who">Julia's prototype decisions, Sep 10. Each reversible in the template with one flag.</span></div></div>
-    <div class="drow"><span class="prov open">Open · Tony</span><div class="dt"><b>Option order (A or B), the question wording, whether "1) 2)" stay, and who keeps pay-now money on no-post.</b><span class="who">Also: does pay-now deserve Apple Pay, given production shows none for the save flow.</span></div></div>
-    <div class="drow"><span class="prov open">Open · Katie</span><div class="dt"><b>Refund step in the console, and whether prepaid creators get the same deadline ladder minus the charge language.</b><span class="who">The Aug 19 charge checklist gains a sibling: verify post → refund.</span></div></div>
-    <div class="drow"><span class="prov open">Open · Nisarg</span><div class="dt"><b>PaymentIntent path next to the SetupIntent, order_cover on creator_campaign, refund wiring to the link-verification event.</b><span class="who">Card sheet is the same Stripe element moved into a sheet; the Terms link must point at the published terms URL.</span></div></div>
-    <div class="drow"><span class="prov open">Open · Julia</span><div class="dt"><b>Re-bless the top-block sentence; refund terms for the pay-now path; whether the chooser is a third A/B arm or a replacement.</b><span class="who">Also still open from Sep 9: the em dash in the production card body, and whether the card step really holds the Shopify order.</span></div></div>
+    <div class="drow"><span class="prov mine">My call</span><div class="dt"><b>Cards are buttons (tap opens the sheet or the door); Tony's order kept; numbers dropped; no Apple Pay; the door is a page and Continue opens the sheet over it; amount shown on the pay-now card, the door body and the sheet.</b><span class="who">Julia's prototype decisions, Sep 10. Each reversible in the template with one flag.</span></div></div>
+    <div class="drow"><span class="prov open">Open · Tony</span><div class="dt"><b>Option order (A or B), the question wording, whether "1) 2)" stay, door as page or sheet, and the "for this campaign" qualifier.</b><span class="who">Also: "payment method" on the door versus "card" on the sheet; the sheet keeps card because the consent line is decided.</span></div></div>
+    <div class="drow"><span class="prov open">Open · Katie</span><div class="dt"><b>Nothing new. Confirm the deadline ladder copy is unchanged for creators who came through the chooser.</b><span class="who">The refund step that the pay-now path would have needed is gone with the door.</span></div></div>
+    <div class="drow"><span class="prov open">Open · Nisarg</span><div class="dt"><b>The card sheet (same Payment Element, in a bottom sheet), the closed-door page, and the paynow_door_viewed event.</b><span class="who">No new Stripe intent, no data field. The Terms link must point at the published terms URL.</span></div></div>
+    <div class="drow"><span class="prov open">Open · Julia</span><div class="dt"><b>Re-bless the top-block sentence; whether the chooser is a third A/B arm or a replacement for the card arm.</b><span class="who">Also still open from Sep 9: the em dash in the production card body, and whether the card step really holds the Shopify order.</span></div></div>
   </div>
 </section>
 
@@ -635,17 +670,19 @@ The brand covers your order, you don't pay anything. You add a credit card to Be
 <section id="handoff">
   <div class="shead"><span class="no">08</span><h2>Interaction inventory</h2><span class="q">trigger → behavior → motion</span></div>
   <p class="intro">One line per interaction, for whoever implements it. Motion is felt, not seen: sheets slide 24px and fade over 260ms ease-out; the scrim fades over 200ms; nothing else moves.</p>
-  <div class="inv">Option card tap/Enter   → sheet opens (guarantee or pay-now), scrim fades in 200ms, sheet 260ms ease-out; focus moves to the card number field
-Scrim tap / Esc         → sheet closes, no animation on exit beyond the scrim fade (exit ease-in 150ms); focus returns to the tapped card
-Learn more (in sheet)   → explainer sheet replaces the card sheet (tall sheet, 64px from top); Got it returns to the card sheet with fields preserved
-Card fields typing      → number groups in fours, expiry as MM/YY, CVC 3 to 4 digits; CTA enables when number, expiry, CVC, name and ZIP are complete
-Save and Continue       → loading spinner in place (label hidden, width unchanged) 700ms → sheet closes → page shows You're set + summary row + Continue
-Pay $52                 → same loading pattern; done state reads Paid $52 with Receipt instead of Change
-Change / Receipt        → out of scope: toast "Out of scope in this prototype"
-Continue                → Content step placeholder (stepper advances); Back returns to the done state
+  <div class="inv">Free option tap/Enter        → guarantee sheet opens, scrim fades in 200ms, sheet 260ms ease-out; focus moves to the card number field
+Pay now tap/Enter            → closed-door page replaces the chooser body in place, no slide; focus moves to Continue with Content Guarantee
+Door · Continue with Content Guarantee → guarantee sheet opens over the door page (same motion); the headline stays visible above it
+Door · Back                  → chooser returns in place; focus returns to the pay-now card
+Scrim tap / Esc              → sheet closes (scrim fades out 150ms ease-in); focus returns to the control that opened it
+Learn more (in sheet)        → explainer sheet replaces the card sheet (tall sheet, 44px from top); Got it returns to the card sheet with fields preserved
+Card fields typing           → number groups in fours, expiry as MM/YY, CVC 3 to 4 digits; CTA enables when number, expiry, CVC, name and ZIP are complete
+Save and Continue            → loading spinner in place (label hidden, width unchanged) 700ms → sheet closes → You're set + summary row + Continue
+Change                       → out of scope: toast "Out of scope in this prototype"
+Continue                     → Content step placeholder (stepper advances); Back to Delivery returns to the done state
 Back chevron, View Brief, Terms link → out of scope: toast
-Variant C segment tap   → note and CTA label swap in place, no layout shift; consent line renders only for the guarantee segment
-Variant D footnote link → pay-now sheet opens over the current page</div>
+Variant C pay-now segment    → closed-door page; Back returns to the form with the guarantee segment selected
+Variant D footnote link      → closed-door page</div>
 </section>
 
 <footer>The Choice Before the Card · built Sep 10 2026 for Tony's Sep 10 idea · fixture from the Sep 9 production screenshot (28 Litsea, Delivery step) · prices from 28litsea.com · companion to the creator ghosting study (card screen rev 5) on port 4234.</footer>
@@ -683,20 +720,27 @@ const COPY = {
     guarantee: { tag: 'Recommended', title: 'Free order, Content Guarantee', body: `${B} covers your order, you don't pay anything. You add a card as a guarantee, and we only charge the order if you never post.` }
   },
   sheet: {
-    guarantee: { title: 'Content Guarantee', sub: `$0 today. We only charge the ${AMOUNT} order if the campaign ends with nothing posted, and you'll always get a final warning first. <a href="#" data-act="explainer">Learn more</a>`, cta: 'Save and Continue', consent: 'By saving your card, you agree to the <a href="#" data-act="toast">Content Guarantee Terms</a>.' },
-    paynow:    { title: `Pay <span class="amt">${AMOUNT}</span> now`, sub: `You'll get the full ${AMOUNT} back on this card once your post is verified. You keep the products either way.`, cta: `Pay ${AMOUNT}`, consent: 'Receipt by email. The refund goes back to this card.' }
+    guarantee: { title: 'Content Guarantee', sub: `$0 today. We only charge the ${AMOUNT} order if the campaign ends with nothing posted, and you'll always get a final warning first. <a href="#" data-act="explainer">Learn more</a>`, cta: 'Save and Continue', consent: 'By saving your card, you agree to the <a href="#" data-act="toast">Content Guarantee Terms</a>.' }
+  },
+  /* the closed door: Tony's copy verbatim (Sep 10 2026, 6:37pm CEST); brand and amount dynamic */
+  closed: {
+    small: `Pay now isn't available for this campaign`,
+    headline: 'The brand is paying for your order',
+    body: `${B} covers the ${AMOUNT} order directly. You just add a payment method to Benable as a guarantee, and it's only billed if you get your product and never post.`,
+    checklist: ['$0 out of pocket', 'No waiting to get paid back', `Post, and you're never charged`],
+    cta: 'Continue with Content Guarantee',
+    back: 'Back'
   },
   lock: 'Payments secured by Stripe. Benable never sees your card number.',
   inline: { section: 'Credit or debit card', para: `To provide brands with our Content Guarantee, all creators are required to have a valid credit or debit card on file. You won't be charged today, and you'll always receive a final warning first.` },
   seg: {
     guarantee: { label: 'Free + Content Guarantee', note: `<b>$0 today.</b> ${B} covers your order. We only charge the ${AMOUNT} order if the campaign ends with nothing posted, and you'll always get a final warning first. <a href="#" data-act="explainer">Learn more</a>` },
-    paynow:    { label: 'Pay now, get reimbursed', note: `<b>Pay ${AMOUNT} now.</b> You get the full ${AMOUNT} back on this card once your post is verified. You keep the products either way.` }
+    paynow:    { label: 'Pay now, get reimbursed' } /* leads to the closed door */
   },
   footnote: `Rather not keep a card on file? <a href="#" data-act="open-paynow">Pay for the order now</a> and get it back after you post.`,
   done: {
     title: `You're set`,
     guarantee: { lede: `We've sent your selection to ${B}, and your order is covered.`, row: 'Content Guarantee', sub: 'Visa ···· 4242 · $0 today', act: 'Change' },
-    paynow:    { lede: `We've sent your selection to ${B}, and your order is paid.`, row: `Paid ${AMOUNT}`, sub: 'Visa ···· 4242 · refunded once your post is verified', act: 'Receipt' },
     cta: 'Continue'
   },
   explainer: {
@@ -780,15 +824,21 @@ function bodyDone(s){
 }
 function bodySeg(s){
   if (s.done) return bodyDone(s);
-  const k = s.seg; const sg = COPY.seg[k]; const sh = COPY.sheet[k];
+  const sg = COPY.seg.guarantee; const sh = COPY.sheet.guarantee;
   return `<div><h1 class="ph-title">${COPY.title}</h1></div>
   <div class="seg" role="group" aria-label="How to place the order">
-    <button data-act="seg-guarantee" aria-pressed="${k==='guarantee'}">${COPY.seg.guarantee.label}</button>
-    <button data-act="seg-paynow" aria-pressed="${k==='paynow'}">${COPY.seg.paynow.label}</button>
+    <button data-act="seg-guarantee" aria-pressed="true">${COPY.seg.guarantee.label}</button>
+    <button data-act="open-paynow" aria-pressed="false">${COPY.seg.paynow.label}</button>
   </div>
   <p class="seg-note">${sg.note}</p>
   ${fields(s)}
-  <div class="ph-foot">${k==='guarantee'?`<p class="ph-consent">${sh.consent}</p>`:''}${ctaHTML(sh.cta, 'save-'+k, s)}${lockLine()}</div>`;
+  <div class="ph-foot"><p class="ph-consent">${sh.consent}</p>${ctaHTML(sh.cta, 'save-guarantee', s)}${lockLine()}</div>`;
+}
+function bodyClosed(s){
+  const c = COPY.closed;
+  return `<div><p class="ph-kick">${c.small}</p><h1 class="ph-title">${c.headline}</h1><p class="ph-lede">${c.body}</p></div>
+  <ul class="chk">${c.checklist.map(t=>`<li><span class="ci" aria-hidden="true">${G.check}</span><span>${t}</span></li>`).join('')}</ul>
+  <div class="ph-foot"><button class="ph-cta" data-act="open-guarantee"><span class="lbl">${c.cta}</span></button><button class="ph-back" data-act="back-to-chooser">${c.back}</button></div>`;
 }
 function bodyInline(s){
   if (s.done) return bodyDone(s);
@@ -818,18 +868,19 @@ function sheetHTML(s){
       <div class="sh-foot"><button class="ph-cta" data-act="explainer-back"><span class="lbl">${e.cta}</span></button></div>
     </div>`;
   }
-  const k = s.sheet; const sh = COPY.sheet[k];
+  const sh = COPY.sheet.guarantee;
   return `<button class="sh-dim" data-act="close" aria-label="Close"></button>
-  <div class="sh" role="dialog" aria-modal="true" aria-label="${k==='guarantee'?'Content Guarantee':'Pay now'}">
+  <div class="sh" role="dialog" aria-modal="true" aria-label="Content Guarantee">
     <div class="grab"></div>
     <div class="sh-head"><h2 class="sh-title">${sh.title}</h2><p class="sh-sub">${sh.sub}</p></div>
     ${fields(s)}
-    <div class="sh-foot"><p class="ph-consent">${sh.consent}</p>${ctaHTML(sh.cta, 'save-'+k, s)}${lockLine()}</div>
+    <div class="sh-foot"><p class="ph-consent">${sh.consent}</p>${ctaHTML(sh.cta, 'save-guarantee', s)}${lockLine()}</div>
   </div>`;
 }
 function phoneHTML(s){
   let body;
   if (s.screen === 'content') body = bodyContent();
+  else if (s.screen === 'closed') body = bodyClosed(s);
   else if (s.variant === 'C') body = bodySeg(s);
   else if (s.variant === 'D') body = bodyInline(s);
   else body = bodyChooser(s);
@@ -862,15 +913,17 @@ function wire(el){
     e.preventDefault();
     const s = el.__state; const act = a.dataset.act;
     if (act === 'toast') return toast(el);
-    if (act === 'open-guarantee' || act === 'open-paynow'){ s.sheet = act.slice(5); s.__opener = act; render(el); focusFirst(el); return; }
+    if (act === 'open-guarantee'){ s.sheet = 'guarantee'; s.__opener = act; render(el); focusFirst(el); return; }
+    if (act === 'open-paynow'){ s.screen = 'closed'; s.__opener = act; render(el); const c = el.querySelector('.ph-cta'); if (c) c.focus(); return; }
+    if (act === 'back-to-chooser'){ s.screen = 'delivery'; render(el); refocus(el, s); return; }
     if (act === 'close'){ s.sheet = null; render(el); refocus(el, s); return; }
     if (act === 'explainer'){ s.__from = s.sheet; s.sheet = 'explainer'; render(el); return; }
     if (act === 'explainer-back'){ s.sheet = s.__from || null; s.__from = null; render(el); if (s.sheet) focusFirst(el); return; }
-    if (act.startsWith('seg-')){ s.seg = act.slice(4); render(el); return; }
-    if (act.startsWith('save-')){
+    if (act === 'seg-guarantee'){ s.seg = 'guarantee'; render(el); return; }
+    if (act === 'save-guarantee'){
       if (a.disabled) return;
       a.classList.add('is-loading'); a.setAttribute('aria-busy','true');
-      setTimeout(()=>{ s.choice = act.slice(5); s.done = true; s.sheet = null; render(el); }, 700);
+      setTimeout(()=>{ s.choice = 'guarantee'; s.done = true; s.sheet = null; s.screen = 'delivery'; render(el); }, 700);
       return;
     }
     if (act === 'continue'){ s.screen = 'content'; render(el); return; }
@@ -902,12 +955,11 @@ rail.addEventListener('click', e=>{
   rail.querySelectorAll('button').forEach(x=>x.classList.toggle('on', x===b));
   if (b.dataset.fill){ Object.assign(live.__state.card, DEMO_CARD); render(live); return; }
   const st = b.dataset.state; const s = freshState('A');
+  if (st === 'closed') s.screen = 'closed';
   if (st === 'guarantee') s.sheet = 'guarantee';
   if (st === 'filled'){ s.sheet = 'guarantee'; Object.assign(s.card, DEMO_CARD); }
   if (st === 'explainer'){ s.sheet = 'explainer'; s.__from = 'guarantee'; }
-  if (st === 'paynow') s.sheet = 'paynow';
-  if (st === 'done-guarantee'){ s.done = true; s.choice = 'guarantee'; }
-  if (st === 'done-paynow'){ s.done = true; s.choice = 'paynow'; }
+  if (st === 'done'){ s.done = true; s.choice = 'guarantee'; }
   if (st === 'content') s.screen = 'content';
   mount(live, s);
   live.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -924,10 +976,10 @@ function cell(label, cap, s, liveWire, scrollToEnd){
 const gal = document.getElementById('gallery');
 [
   ['1 · The chooser', 'Page title, the Sep 9 sentence adapted, Tony\'s question, two cards. Nothing about a card yet.', (()=>freshState('A'))()],
-  ['2 · Guarantee sheet', 'Opens under the question. One line of why, the fields, the consent line, Save and Continue disabled.', (()=>{const s=freshState('A'); s.sheet='guarantee'; return s;})()],
-  ['3 · Filled', 'The moment the fields are complete the button comes alive. Same width, no layout shift.', (()=>{const s=freshState('A'); s.sheet='guarantee'; Object.assign(s.card, DEMO_CARD); return s;})()],
-  ['4 · Explainer', 'Learn more opens the rev-5 sheet verbatim, amount $52. Got it returns to the card sheet with fields preserved.', (()=>{const s=freshState('A'); s.sheet='explainer'; s.__from='guarantee'; return s;})()],
-  ['5 · Pay-now sheet', 'Same fields, the button says Pay $52, the refund promise carries no date.', (()=>{const s=freshState('A'); s.sheet='paynow'; Object.assign(s.card, DEMO_CARD); return s;})()],
+  ['2 · The closed door', 'Pay now, tapped. Tony\'s page verbatim: the brand is paying, three reasons, Continue with Content Guarantee, Back.', (()=>{const s=freshState('A'); s.screen='closed'; return s;})()],
+  ['3 · Guarantee sheet', 'Opens under the question (or over the door). One line of why, the fields, the consent line, Save and Continue disabled.', (()=>{const s=freshState('A'); s.sheet='guarantee'; return s;})()],
+  ['4 · Filled', 'The moment the fields are complete the button comes alive. Same width, no layout shift.', (()=>{const s=freshState('A'); s.sheet='guarantee'; Object.assign(s.card, DEMO_CARD); return s;})()],
+  ['5 · Explainer', 'Learn more opens the rev-5 sheet verbatim, amount $52. Got it returns to the card sheet with fields preserved.', (()=>{const s=freshState('A'); s.sheet='explainer'; s.__from='guarantee'; return s;})()],
   ['6 · Done', 'You\'re set. The summary row says what the card is for and what happens next; Continue moves to Content.', (()=>{const s=freshState('A'); s.done=true; s.choice='guarantee'; return s;})()]
 ].forEach(([l,c,s])=>gal.appendChild(cell(l,c,s,false)));
 
@@ -935,7 +987,7 @@ const ag = document.getElementById('alts-gallery');
 [
   ['B · Recommended first', 'Same cards, order swapped. Good news before the price.', (()=>freshState('B'))(), true],
   ['C · Segmented, same page', 'No new page. The control above the fields swaps the note and the button label. Live: tap a segment.', (()=>freshState('C'))(), true],
-  ['C · pay-now segment', 'Same page with the pay-now segment active: consent line drops out, button says Pay $52.', (()=>{const s=freshState('C'); s.seg='paynow'; Object.assign(s.card, DEMO_CARD); return s;})(), true],
+  ['C · after tapping pay now', 'The segment opens the same closed door. Back returns to the form with the guarantee segment selected.', (()=>{const s=freshState('C'); s.screen='closed'; return s;})(), true],
   ['D · Footnote exit', 'Production page with the Sep 9 copy, plus one line under the lock text, shown scrolled to the button as the creator would see it. Live: tap the link.', (()=>freshState('D'))(), true, true]
 ].forEach(([l,c,s,w,se])=>ag.appendChild(cell(l,c,s,w,se)));
 </script>
